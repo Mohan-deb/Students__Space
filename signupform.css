@@ -68,12 +68,16 @@ a{
     padding-left: 10px;
 
 }
+#createuser{
+    margin-bottom: 5px;
+}
 label{
     font-size: large;
-    margin-bottom:5px;
+    margin-bottom:4px;
 }
 input{
     height: 25px;
     padding-left: 7px;
+    margin-top: 0;
     border-radius: 10px;
 }
