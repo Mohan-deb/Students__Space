@@ -1,0 +1,89 @@
+body{
+    background-color:aliceblue;
+    background-image: url(background_image2.jpg );
+    background-position: top;
+    background-repeat: no-repeat;
+    background-size:cover;
+    background-attachment: fixed;
+    font-family: 'Times New Roman', Times, serif;
+}
+fieldset{
+    width: 500px;
+    height: 35;
+    border-radius: 25px;
+}
+.form-container{
+    width: 1110px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.flex-box1,.flex-box3,.flex-box4{
+    display: flex;
+    flex-direction: column;
+}
+.flex-box2{
+    display: flex;
+    justify-content:space-around;
+    align-items: baseline;
+}
+.flex-box{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+h2{
+    color: navy;
+}
+#btnpass{
+    width: 170px;
+    height: 45px;
+    border-color: whitesmoke;
+    border-radius: 15px;
+    font-size: medium;
+    color: black;
+    background-color: rgba(34, 185, 211, 0.818);
+    margin-top: 15px;
+}
+#btnotp{
+    border-color: whitesmoke;
+    border-radius: 15px;
+    padding: 5px;
+    width: 110px;
+    height: 33px;
+    font-size: medium;
+    color: black;
+    background-color: rgba(34, 185, 211, 0.818);
+}
+#otp{
+    width: 275px;
+}
+
+#btncnfrm{
+    border-color: whitesmoke;
+    border-radius: 15px;
+    font-size: medium;
+    color: black;
+    background-color: rgba(34, 185, 211, 0.818);
+    width: 150px;
+    height: 33px;
+    padding: 5px;
+}
+#forgotmail{
+    width: 350px;
+    margin-top: 7px;
+}
+label{
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-size: 17px;
+}
+input{
+    height: 25px;
+    border-radius: 10px;
+    padding-left: 7px;
+}
+

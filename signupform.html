@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Signup Page</title>
+    <link rel="stylesheet" href="signupform.css">
+</head>
+
+<body>
+    <div class="form-container">
+        <h2>Student Space</h2>
+        <h3>Create Your Login Credentials</h3>
+        <form action="" method="post">
+            <fieldset>
+                <div class="flex-items">
+                    <label for="createuser">Create Username:</label>
+                    <input type="text" id="createuser" placeholder="Enter your name">
+                </div>
+                <div class="flex-items">
+
+                    <label for="usermail">Enter Email:</label>
+                    <input type="email" id="usermail" placeholder="Enter your Email">
+                </div>
+                <div class="flex-items">
+                    <label for="branchid">Select Branch:</label>
+                    <select name="Branchname" id="branchid">
+                        <option value="CME">Computer Engineering</option>
+                        <option value="MECH">Mechanical Engineering</option>
+                        <option value="EEE">Electrical And Electronical Engineering </option>
+                        <option value="CIVIL">Civil Engineering</option>
+                        <option value="CCP">Comercial and Computer Engineering</option>
+                    </select>
+                </div>
+                <div class="flex-items">
+                    <label for="year">Select Year:</label>
+                    <select name="year" id="year">
+                        <option value="1">1st year</option>
+                        <option value="2">2nd year</option>
+                        <option value="3">3rd year</option>
+                    </select>
+                </div>
+                <div class="flex-items">
+                    <label for="semId">Current Semster:</label>
+                    <input type="number" min="1" max="6">
+                </div>
+                <div class="flex-items">
+                    <label for="pass">Create Password:</label>
+                    <input type="password" id="pass" name="password">
+                </div>
+                <div class="flex-items">
+                    <label for="Retype">Re-Enter Password:</label>
+                    <input type="password" id="Retype" name="validpass">
+                </div>
+                <div class="flex-item1">
+                    <button type="submit" id="signin">Signin</button>
+                    <p>Already have Account<a href="StudentLogin.html">Login</a></p>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+</body>
+
+</html>

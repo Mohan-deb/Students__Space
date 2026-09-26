@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forgot Password</title>
+    <link rel="stylesheet" href="Forgot.css">
+    <script src="https://code.jquery.com/jquery-4.0.0.slim.min.js"
+        integrity="sha256-8DGpv13HIm+5iDNWw1XqxgFB4mj+yOKFNb+tHBZOowc=" crossorigin="anonymous"></script>
+    <script src="student_dashboard.js"></script>
+</head>
+
+<body>
+    <div class="form-container">
+        <h2>Student Space</h2>
+        <h3>Get Your Password Here</h3>
+        <form action="" method="post">
+            <fieldset>
+                <div class="flex-box3">
+                    <label for="forgotmail">Email:</label>
+                    <div class="flex-box2">
+                        <input type="email" id="forgotmail">
+                        <button type="button" id="btnotp">Send OTP</button>
+                    </div>
+                </div>
+                <div class="flex-box1">
+                    <label for="otp">OTP:</label>
+                    <div class="flex-box2">
+                    <input type="text" id="otp">
+                    <button type="button" id="btncnfrm">Confirm OTP</button>
+                    </div>
+                </div>
+                <div class="flex-box4">
+                    <label for="newpass">Create New Password:</label>
+                    <input type="password" id="newpass" placeholder="Create New Password">
+                </div>
+                <div class="flex-box4">
+                    <label for="checknewpass">Re-Enter Password:</label>
+                    <input type="password" id="checknewpass" placeholder="Re-Enter Password">
+                </div>
+                <div class="flex-box">
+                    <button type="button" id="btnpass">Update Password</button>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+</body>
+
+</html>
