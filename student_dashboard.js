@@ -6,4 +6,17 @@ $(document).ready(function () {
     $("#btncnfrm").click(function () {
         $(".flex-box,.flex-box4").show()
     });
-})
+    $("#accordian label").click(function () {
+
+        const content = $(this).next("input").next(".content");
+
+        $(".content").not(content).slideUp();
+        $("#accordian label").not(this).find(".arrow").removeClass("active");
+
+        content.slideToggle();
+
+        $(this).find(".arrow").toggleClass("active");
+
+    });
+
+});
