@@ -9,6 +9,15 @@
     <script src="https://code.jquery.com/jquery-4.0.0.slim.min.js"
         integrity="sha256-8DGpv13HIm+5iDNWw1XqxgFB4mj+yOKFNb+tHBZOowc=" crossorigin="anonymous"></script>
     <script src="student_dashboard.js"></script>
+
+<style>
+.password-wrapper{position:relative;display:flex;align-items:center;width:100%}
+.password-wrapper input{width:100%;padding-right:46px}
+.password-toggle{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:34px;height:34px;border:0;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:6px;padding:5px}
+.password-toggle:hover{background:rgba(37,99,235,.08)}
+.password-toggle:focus-visible{outline:2px solid #2563eb;outline-offset:1px}
+.password-toggle svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+</style>
 </head>
 
 <body>
@@ -33,11 +42,11 @@
                 </div>
                 <div class="flex-box4">
                     <label for="newpass">Create New Password:</label>
-                    <input type="password" id="newpass" placeholder="Create New Password">
+                    <div class="password-wrapper"><input type="password" id="newpass" placeholder="Create New Password"><button type="button" class="password-toggle" aria-label="Show password" title="Show password" data-target="newpass"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></svg></button></div>
                 </div>
                 <div class="flex-box4">
                     <label for="checknewpass">Re-Enter Password:</label>
-                    <input type="password" id="checknewpass" placeholder="Re-Enter Password">
+                    <div class="password-wrapper"><input type="password" id="checknewpass" placeholder="Re-Enter Password"><button type="button" class="password-toggle" aria-label="Show password" title="Show password" data-target="checknewpass"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></svg></button></div>
                 </div>
                 <div class="flex-box">
                     <button type="button" id="btnpass">Update Password</button>
@@ -45,6 +54,19 @@
             </fieldset>
         </form>
     </div>
+
+<script>
+document.querySelectorAll('.password-toggle').forEach(function(button){
+    button.addEventListener('click', function(){
+        const input = document.getElementById(button.dataset.target);
+        const showing = input.type === 'password';
+        input.type = showing ? 'text' : 'password';
+        button.innerHTML = showing ? `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 3 18 18M10.6 6.2A10.9 10.9 0 0 1 12 6c6.5 0 10 6 10 6a18 18 0 0 1-3.1 3.6M6.2 6.8C3.5 8.6 2 12 2 12s3.5 6 10 6c1.8 0 3.4-.4 4.8-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>` : `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></svg>`;
+        button.setAttribute('aria-label', showing ? 'Hide password' : 'Show password');
+        button.setAttribute('title', showing ? 'Hide password' : 'Show password');
+    });
+});
+</script>
 </body>
 
 </html>
