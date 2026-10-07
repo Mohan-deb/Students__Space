@@ -1,6 +1,6 @@
 body{
     background-color:aliceblue;
-    background-image: url(background_image2.jpg );
+    background-image: url("../images/background_image2.jpg");
     background-position: top;
     background-repeat: no-repeat;
     background-size:cover;

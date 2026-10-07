@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Signup Page</title>
-    <link rel="stylesheet" href="signupform.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/signupform.css') }}">
 </head>
 
 <body>
@@ -58,8 +58,8 @@
                     <input type="password" id="Retype" name="validpass">
                 </div>
                 <div class="flex-item1">
-                    <button type="submit" id="signin">Signin</button>
-                    <p>Already have Account<a href="StudentLogin.html">Login</a></p>
+                    <a href="{{ url_for('student_login_') }}" id="signin">Signin</a>
+                    <p>Already have Account<a href="{{ url_for('student_login') }}">Login</a></p>
                 </div>
             </fieldset>
         </form>

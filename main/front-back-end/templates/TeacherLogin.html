@@ -6,8 +6,8 @@
     <meta name="description" content="Student Space for Government Polytechnic Srikakulam students.">
     <meta name="keywords" content="Student Space,Polytechnic,students,studentspace">
     <title>Teacher Login</title>
-    <link rel="stylesheet" href="StudentLogin.css">
-    <link rel="stylesheet" href="Teacher.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/StudentLogin.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Teacher.css') }}">
 </head>
 
 <body>
@@ -30,7 +30,7 @@
         </div>
         <div class="flex-container4">
             <button type="submit" id="Teacherlogin">Login</button>
-            <a href="ForgotPass.html">Forgot Password?</a>
+            <a href= "{{ url_for('forgot_password')}}">Forgot Password?</a>
         </div>
         </fieldset>
         </form>

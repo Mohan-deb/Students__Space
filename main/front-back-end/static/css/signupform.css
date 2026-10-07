@@ -1,81 +1,93 @@
-
-body{
-    background-color:aliceblue;
-    background-image: url(background_image2.jpg );
+body {
+    background-color: aliceblue;
+    background-image: url("../images/background_image2.jpg");
     background-position: center;
     background-repeat: no-repeat;
-    background-size:cover;
+    background-size: cover;
     background-attachment: fixed;
 }
-h2{
+
+h2 {
     color: navy;
     font-size: x-large;
     margin-top: 0;
 }
-h3{
+
+h3 {
     color: black;
     font-size: large;
     margin: 0;
 }
-.form-container{
+
+.form-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width:900px;
+    width: 900px;
     height: 35%;
     flex-wrap: wrap;
 }
-.flex-items{
+
+.flex-items {
     display: flex;
     flex-direction: column;
     padding: 10px;
 }
-fieldset{
-    margin-top:20px;
+
+fieldset {
+    margin-top: 20px;
     width: 400px;
     border-radius: 25px;
 }
-.flex-item1{
+
+.flex-item1 {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
 }
 
-#branchid,#year{
+#branchid,
+#year {
     height: 35px;
     border-radius: 15px;
 
 }
-#signin{
+
+#signin {
     width: 200px;
     height: 30px;
     border-color: black;
-    border: 2px 3px rgba(0,0,0,0.45);
+    border: 2px 3px rgba(0, 0, 0, 0.45);
     border-radius: 10px;
     margin-bottom: 5px;
     background-color: rgba(0, 0, 226, 0.805);
     color: white;
     font-size: large;
 }
-p{
-    font-size:large;
+
+p {
+    font-size: large;
 }
-a{
+
+a {
     text-decoration: none;
     font-size: large;
     color: navy;
     padding-left: 10px;
 
 }
-#createuser{
+
+#createuser {
     margin-bottom: 5px;
 }
-label{
+
+label {
     font-size: large;
-    margin-bottom:4px;
+    margin-bottom: 4px;
 }
-input{
+
+input {
     height: 25px;
     padding-left: 7px;
     margin-top: 0;

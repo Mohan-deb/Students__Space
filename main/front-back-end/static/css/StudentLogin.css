@@ -5,7 +5,7 @@
 }
 
 body {
-    background-image: url(IMG_20260920_230336.jpg);
+    background-image: url("../images/student_login.jpg");
     background-repeat: no-repeat;
     background-position: center;
     background-attachment: fixed;
@@ -16,7 +16,7 @@ h2 {
     color: blue;
     font-size: xx-large;
     margin-top: 75px;
-    text-shadow: 0px 1px 4px rgba(0,0,0,0.45);
+    text-shadow: 0px 1px 4px rgba(0, 0, 0, 0.45);
 }
 
 h3 {
@@ -24,7 +24,7 @@ h3 {
     font-weight: bold;
     margin-top: 20px;
     margin-bottom: 40px;
-    text-shadow: 3px 0px 4px rgba(0,0,0,0.45);
+    text-shadow: 3px 0px 4px rgba(0, 0, 0, 0.45);
 }
 
 .flex-container,
@@ -40,7 +40,7 @@ h3 {
     flex-direction: column;
     justify-content: center;
     align-items: space-between;
-    flex-wrap:wrap;
+    flex-wrap: wrap;
 
 }
 
@@ -60,8 +60,9 @@ label {
     font-size: large;
 }
 
-#Studentlogin,#Teacherlogin,
-#btnsignup{
+#Studentlogin,
+#Teacherlogin,
+#btnsignup {
     width: 130px;
     height: 35px;
     border-radius: 15px;
@@ -72,23 +73,25 @@ label {
     margin-top: 15px;
 }
 
-#btnsignup{
+#btnsignup {
     width: 150px;
     padding-right: 5px;
 }
 
-#userId,#TeacherId,
-#password ,#passId{
+#userId,
+#TeacherId,
+#password,
+#passId {
     font-size: medium;
     font-family: 'Times New Roman', Times, serif;
     height: 35px;
     width: 275px;
     border-color: 1px 1px 1px black;
     border-radius: 10px;
-    padding-left:10px;
+    padding-left: 10px;
 }
 
-a{
+a {
     text-decoration: none;
     font-size: large;
     color: white;
@@ -96,10 +99,12 @@ a{
     margin-top: 20px;
     padding-left: 20px;
 }
-#forgot{
-    color:blue;
+
+#forgot {
+    color: blue;
 }
-.flex-container4{
+
+.flex-container4 {
     display: flex;
     justify-content: center;
 }
