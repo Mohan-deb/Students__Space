@@ -64,6 +64,9 @@ fieldset {
     background-color: rgba(0, 0, 226, 0.805);
     color: white;
     font-size: large;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 p {

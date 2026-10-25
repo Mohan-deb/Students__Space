@@ -9,6 +9,15 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/StudentLogin.css') }}">
 </head>
 
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const message = params.get("message");
+
+    if (message === "success") {
+        alert("Account created successfully!");
+    }
+</script>
+
 <body>
     <div class="flex-container">
         <div class="flex-container1">
@@ -21,11 +30,11 @@
                 <fieldset>
                     <div class=" flex-container2">
                         <label for=" userId">Email / PIN:</label>
-                        <input type="text" id="userId" name="username" placeholder="Enter Email or PIN">
+                        <input type="text" id="userId" name="username" placeholder="Enter Email or PIN" required>
                     </div>
                     <div class="flex-container2">
                         <label for="password">Password:</label>
-                        <input type="password" id="password" name="password" placeholder="Enter Password">
+                        <input type="password" id="password" name="password" placeholder="Enter Password" required>
                     </div>
                     <div class="flex-container4">
                         <a href="{{ url_for('student_login_') }}" id="Studentlogin">

@@ -6,32 +6,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Signup Page</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/signupform.css') }}">
+
 </head>
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const message = params.get("message");
+
+    if (message === "exists") {
+        alert("Student PIN or email already exists!");
+    }
+</script>
 
 <body>
     <div class="form-container">
         <h2>Student Space</h2>
         <h3>Create Your Login Credentials</h3>
-        <form action="" method="post">
+        <form action="" method="post" id="signupform">
             <fieldset>
                 <div class="flex-items">
                     <label for="createuser">Create Username:</label>
-                    <input type="text" id="createuser" placeholder="Enter your name">
+                    <input type="text" id="createuser" name="createuser" placeholder="Enter your name" required>
                 </div>
                 <div class="flex-items">
                     <label for="userpin">Enter PIN:</label>
-                    <input type="text" id="userpin" placeholder="Enter your Unique PIN">
+                    <input type="text" id="userpin" name="userpin" placeholder="Enter your Unique PIN" required>
                 </div>
                 <div class="flex-items">
 
                     <label for="usermail">Enter Email:</label>
-                    <input type="email" id="usermail" placeholder="Enter your Email">
+                    <input type="email" id="usermail" name="usermail" placeholder="Enter your Email" required>
                 </div>
                 <div class="flex-items">
                     <label for="branchid">Select Branch:</label>
-                    <select name="Branchname" id="branchid">
+                    <select id="branchid" name="branchid" required>
                         <option value="CME">Computer Engineering</option>
-                        <option value="MECH">Mechanical Engineering</option>
                         <option value="EEE">Electrical And Electronical Engineering </option>
                         <option value="CIVIL">Civil Engineering</option>
                         <option value="CCP">Comercial and Computer Engineering</option>
@@ -39,31 +47,36 @@
                 </div>
                 <div class="flex-items">
                     <label for="year">Select Year:</label>
-                    <select name="year" id="year">
+                    <select name="year" id="year" name="year" required>
                         <option value="1">1st year</option>
                         <option value="2">2nd year</option>
                         <option value="3">3rd year</option>
                     </select>
                 </div>
                 <div class="flex-items">
-                    <label for="semId">Current Semster:</label>
-                    <input type="number" min="1" max="6">
+                    <label for="semester">Current Semster:</label>
+                    <input type="number" min="1" max="6" id="semester" name="semester" required>
                 </div>
                 <div class="flex-items">
                     <label for="pass">Create Password:</label>
-                    <input type="password" id="pass" name="password">
+                    <input type="password" id="password" name="password" required>
                 </div>
                 <div class="flex-items">
                     <label for="Retype">Re-Enter Password:</label>
-                    <input type="password" id="Retype" name="validpass">
+                    <input type="password" id="confirm_password" name="confirm_password" required>
+
                 </div>
                 <div class="flex-item1">
-                    <a href="{{ url_for('student_login_') }}" id="signin">Signin</a>
-                    <p>Already have Account<a href="{{ url_for('student_login') }}">Login</a></p>
+                    <button type="submit" id="signin">Sign Up</button>
+                    <p>Already have Account
+                        <a href="{{ url_for('student_login') }}">Login</a>
+                    </p>
                 </div>
             </fieldset>
         </form>
     </div>
+
 </body>
+<script src="{{ url_for('static', filename='js/password_rechecking.js') }}"></script>
 
 </html>
