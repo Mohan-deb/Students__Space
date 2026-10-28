@@ -41,7 +41,7 @@ def student_login():
 
 @app.route("/teacher_login")
 def teacher_login():
-    return render_template("TeacherLogin.html")
+    return render_template("teacherLogin.html")
 
 
 @app.route("/student_login_")
