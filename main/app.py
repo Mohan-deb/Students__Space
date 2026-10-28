@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for
 from database.main_database import StudentDatabase, s
 from werkzeug.security import generate_password_hash
+from exceptions import students_exceptions as studente
 
 app = Flask(__name__)
 
@@ -11,8 +12,30 @@ def home():
     return render_template("homepage.html")
 
 
-@app.route("/student_login")
+@app.route("/student_login", methods=["GET", "POST"])
 def student_login():
+
+    if request.method == "POST":
+        data = (
+            request.form.get("studentmail","").strip(),
+            request.form.get("password","").strip()
+            )
+
+        try:
+            student_database.connection()
+            student_database.create_student()
+            student_database.check_student(data)
+            return redirect(url_for("student_login_"))
+
+        except studente.StudentEmailNotFound:
+            return redirect(request.path + "?message=emailnotfound")
+
+        except studente.StudentPasswordIncorrect:
+            return redirect(request.path + "?message=wrongpassword")
+        
+        finally:
+            student_database.close_database()
+
     return render_template("StudentLogin.html")
 
 
@@ -30,21 +53,21 @@ def student_login_():
 def create_account():
 
     if request.method == "POST":
-
-        student_database.connection()
-        student_database.create_student()
-
+        
         data = (
-            hash(request.form.get("userpin", "").strip()),
-            hash(request.form.get("createuser", "").strip()),
-            hash(request.form.get("usermail", "").strip()),
-            hash(request.form.get("branchid", "")),
-            hash(request.form.get("year", "")),
-            hash(request.form.get("semester", "")),
+            request.form.get("userpin", "").strip().lower(),
+            request.form.get("createuser", "").strip().lower(),
+            request.form.get("usermail", "").strip(),
+            request.form.get("branchid", ""),
+            request.form.get("year", ""),
+            request.form.get("semester", ""),
             generate_password_hash(request.form.get("password", ""))
         )
 
+            
         try:
+            student_database.connection()
+            student_database.create_student()
             student_database.insert_student(data)
         except s.IntegrityError:
             return redirect(request.path + "?message=exists")

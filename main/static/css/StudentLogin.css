@@ -113,3 +113,10 @@ a {
     display: flex;
     justify-content: center;
 }
+
+.error {
+    color: red;
+    font-size: medium;
+    font-family: "Roboto", sans-serif;
+    justify-content: center;
+}

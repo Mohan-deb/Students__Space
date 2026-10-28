@@ -8,14 +8,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/signupform.css') }}">
 
 </head>
-<script>
-    const params = new URLSearchParams(window.location.search);
-    const message = params.get("message");
 
-    if (message === "exists") {
-        alert("Student PIN or email already exists!");
-    }
-</script>
 
 <body>
     <div class="form-container">
@@ -77,6 +70,15 @@
     </div>
 
 </body>
+
 <script src="{{ url_for('static', filename='js/password_rechecking.js') }}"></script>
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const message = params.get("message");
+
+    if (message === "exists") {
+        alert("Student PIN or email already exists!");
+    }
+</script>
 
 </html>

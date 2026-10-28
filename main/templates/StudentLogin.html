@@ -9,14 +9,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/StudentLogin.css') }}">
 </head>
 
-<script>
-    const params = new URLSearchParams(window.location.search);
-    const message = params.get("message");
 
-    if (message === "success") {
-        alert("Account created successfully!");
-    }
-</script>
 
 <body>
     <div class="flex-container">
@@ -29,21 +22,20 @@
             <form action="" method="post" id="StudentForm">
                 <fieldset>
                     <div class=" flex-container2">
-                        <label for=" userId">Email / PIN:</label>
-                        <input type="text" id="userId" name="username" placeholder="Enter Email or PIN" required>
-                    </div>
-                    <div class="flex-container2">
+                        <label for=" userId">Email :</label>
+                        <input type="text" id="userId" name="studentmail" placeholder="Enter Email" required>
                         <label for="password">Password:</label>
                         <input type="password" id="password" name="password" placeholder="Enter Password" required>
                     </div>
-                    <div class="flex-container4">
-                        <a href="{{ url_for('student_login_') }}" id="Studentlogin">
-                            Login
-                        </a>
-
-                        <a href="{{ url_for('create_account') }}" id="btnsignup">
-                            Create Account
-                        </a>
+                    <div class="flex-container2">
+                        <div class="flex-container4">
+                            <button type="submit" id="Studentlogin">
+                                Login
+                            </button>
+                            <a href="{{ url_for('create_account') }}" id="btnsignup">
+                                Create Account
+                            </a>
+                        </div>
                     </div>
 
                     <div class="flex-container4">
@@ -59,5 +51,19 @@
         </div>
     </div>
 </body>
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const message = params.get("message");
+    let password = "";
+
+    if (message === "success") {
+        alert("Account created successfully!");
+    } else if (message === "emailnotfound") {
+        alert("Student Email Not Found")
+    } else if (message === "wrongpassword") {
+        alert("Wrong Password")
+    }
+
+</script>
 
 </html>
