@@ -1,5 +1,5 @@
 try:
-    from flask import Flask, render_template, request, redirect, url_for
+    from flask import Flask, render_template, request, redirect, url_for,session
     from database.student_database import StudentDatabase
     from database.teacher_database import TeacherDatabase
     import sqlite3 as s
@@ -13,6 +13,7 @@ except ModuleNotFoundError:
     pass
 
 app = Flask(__name__)
+app.secret_key ="student-space-secret-key"
 
 app.config["DATABASE"] = str(
     Path(app.root_path)
@@ -27,6 +28,8 @@ with app.app_context():
 # Register automatic database cleanup
 init_app(app)
 
+
+
 student_database = StudentDatabase()
 teacher_database = TeacherDatabase()
 
@@ -36,15 +39,21 @@ def home():
 
 
 @app.route("/student_login", methods=["GET", "POST"])
+
 def student_login():
 
     if request.method == "POST":
 
         try:
-            student_database.check_student(
+            student = student_database.check_student(
                 request.form.get("studentmail","").strip().lower(),
                 request.form.get("password","").strip()
             )
+            session.clear()
+            session["student_id"]= student["id"]
+            session["student_name"] = student["name"]
+            session["branch"] = student["branch"]
+            
             return redirect(url_for("student_login_"))
 
         except ce.EmailNotFound:
@@ -60,10 +69,15 @@ def student_login():
 def teacher_login():
     if request.method == "POST":
         try:
-            teacher_database.check_teacher(
+            teacher = teacher_database.check_teacher(
                 request.form.get("teachermail","").strip(),
                 request.form.get("teacherpassword","")
             )
+            
+            session.clear()
+            session["teacher_id"] = teacher["id"]
+            session["teacher_name"] = teacher["teacher_name"]
+            session["branch"] = teacher["branch"]
 
             return redirect(url_for("teacher_dashboard"))
         
