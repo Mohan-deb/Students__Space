@@ -61,7 +61,7 @@ label {
 }
 
 #Studentlogin,
-#Teacherlogin,
+#teachersubmit,
 #btnsignup {
     width: 130px;
     height: 35px;
@@ -84,9 +84,9 @@ label {
 }
 
 #userId,
-#TeacherId,
+#teachermail,
 #password,
-#passId {
+#teacherpassword {
     font-size: medium;
     font-family: 'Times New Roman', Times, serif;
     height: 35px;

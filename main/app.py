@@ -1,11 +1,34 @@
-from flask import Flask, render_template, request, redirect, url_for
-from database.main_database import StudentDatabase, s
-from werkzeug.security import generate_password_hash
-from exceptions import students_exceptions as studente
+try:
+    from flask import Flask, render_template, request, redirect, url_for
+    from database.student_database import StudentDatabase
+    from database.teacher_database import TeacherDatabase
+    import sqlite3 as s
+    from werkzeug.security import generate_password_hash
+    from exceptions import common_exceptions as ce
+    from pathlib import Path
+    from database.db import init_app, init_db
+except FileNotFoundError:
+    pass
+except ModuleNotFoundError:
+    pass
 
 app = Flask(__name__)
 
+app.config["DATABASE"] = str(
+    Path(app.root_path)
+    / "database"
+    / "main_database.db"
+)
+
+# Create database tables
+with app.app_context():
+    init_db()
+
+# Register automatic database cleanup
+init_app(app)
+
 student_database = StudentDatabase()
+teacher_database = TeacherDatabase()
 
 @app.route("/")
 def home():
@@ -16,31 +39,37 @@ def home():
 def student_login():
 
     if request.method == "POST":
-        data = (
-            request.form.get("studentmail","").strip(),
-            request.form.get("password","").strip()
-            )
 
         try:
-            student_database.connection()
-            student_database.create_student()
-            student_database.check_student(data)
+            student_database.check_student(
+                request.form.get("studentmail","").strip().lower(),
+                request.form.get("password","").strip()
+            )
             return redirect(url_for("student_login_"))
 
-        except studente.StudentEmailNotFound:
+        except ce.EmailNotFound:
             return redirect(request.path + "?message=emailnotfound")
 
-        except studente.StudentPasswordIncorrect:
+        except ce.PasswordIncorrect:
             return redirect(request.path + "?message=wrongpassword")
-        
-        finally:
-            student_database.close_database()
 
     return render_template("StudentLogin.html")
 
 
-@app.route("/teacher_login")
+@app.route("/teacher_login", methods=["GET", "POST"])
 def teacher_login():
+    if request.method == "POST":
+        print("i am post method")
+        try:
+            teacher_database.check_teacher(
+                request.form.get("teachermail","").strip(),
+                request.form.get("teacherpassword","")
+            )
+        except s.IntegrityError:
+            pass
+        except s.OperationalError:
+            pass
+
     return render_template("teacherLogin.html")
 
 
@@ -63,16 +92,11 @@ def create_account():
             request.form.get("semester", ""),
             generate_password_hash(request.form.get("password", ""))
         )
-
             
         try:
-            student_database.connection()
-            student_database.create_student()
             student_database.insert_student(data)
         except s.IntegrityError:
             return redirect(request.path + "?message=exists")
-        finally:
-            student_database.close_database()
 
         return redirect(url_for("student_login", message="success"))
     
@@ -90,4 +114,4 @@ def forgot_password():
 
 
 if __name__ == "__main__":
-    app.run(debug=True) 
+    app.run(debug=False)
