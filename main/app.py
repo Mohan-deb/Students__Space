@@ -124,5 +124,13 @@ def forgot_password():
     return render_template("ForgotPass.html")
 
 
+
+@app.route("/adminlogin",methods=["GET","POST"])
+def adminlogin():
+    if request.method =="POST":
+        return redirect(url_for("adminlogin"))
+    return render_template("adminlogin.html")
+
+
 if __name__ == "__main__":
     app.run(debug=False)
