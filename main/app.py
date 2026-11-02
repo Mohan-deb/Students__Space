@@ -59,14 +59,20 @@ def student_login():
 @app.route("/teacher_login", methods=["GET", "POST"])
 def teacher_login():
     if request.method == "POST":
-        print("i am post method")
         try:
             teacher_database.check_teacher(
                 request.form.get("teachermail","").strip(),
                 request.form.get("teacherpassword","")
             )
+
+            return redirect(url_for("teacher_dashboard"))
+        
         except s.IntegrityError:
             pass
+        except ce.EmailNotFound:
+            return redirect(request.path + "?message=emailnotfound")
+        except ce.PasswordIncorrect:
+            return redirect(request.path + "?message=wrongpassword")
         except s.OperationalError:
             pass
 
@@ -76,6 +82,11 @@ def teacher_login():
 @app.route("/student_login_")
 def student_login_():
     return render_template("student_dashboard.html")
+
+
+@app.route("/teacher_dashboard")
+def teacher_dashboard():
+    return render_template("teacher_dashboard.html")
 
 
 @app.route("/create_account", methods=["GET", "POST"])

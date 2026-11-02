@@ -49,19 +49,7 @@
         </div>
     </div>
 </body>
-<script>
-    const params = new URLSearchParams(window.location.search);
-    const message = params.get("message");
-    let password = "";
 
-    if (message === "success") {
-        alert("Account created successfully!");
-    } else if (message === "emailnotfound") {
-        alert("Student Email Not Found")
-    } else if (message === "wrongpassword") {
-        alert("Wrong Password")
-    }
-
-</script>
+<script src="{{ url_for('static', filename='js/check_user_credentials.js')}}"></script>
 
 </html>
