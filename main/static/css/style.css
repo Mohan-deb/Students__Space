@@ -36,13 +36,27 @@ ul li{
     flex-wrap: wrap;
     justify-content: space-between;
 }
-#Student,#Teacher{
+#Student,#Teacher,#Admin{
     padding: 10px;
     border-radius: 15px;
     background-color:rgba(15, 3, 255, 0.784) ;
     font-weight: 700px;
     color: white;
     font-size: medium;
+}
+#Admin{
+    width: 70px;
+    border-color: white;
+    margin-top:7px;
+    text-align: center;
+    height: 20px;
+    width: 90px;
+}
+.flex-item3{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
 }
 a{
     text-decoration: none;
@@ -62,7 +76,10 @@ a:hover
     background-color: rgb(106, 215, 234);
     color: black;
 }
-
+#Admin:hover{
+    background-color: rgb(106, 215, 234);
+    color: black;
+}
 #accordian{
     margin: 100px auto;
     width: 600px;

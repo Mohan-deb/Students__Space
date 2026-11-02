@@ -1,0 +1,98 @@
+* {
+    margin: 0;
+    padding: 0;
+
+}
+
+body {
+    background-image: url("../images/adminlogin page.jpg");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-attachment: fixed;
+    background-size: cover;
+}
+
+.flex-container {
+    height: 500px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin-top: 50px;
+
+}
+
+.flex-container2 {
+    display: flex;
+    flex-direction: column;
+    height: 175px;
+
+}
+
+.flex-container4 {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+}
+
+fieldset {
+    margin-top: 100px;
+    width: 100px;
+    border-radius: 35px;
+    padding: 30px;
+    padding-left: 75px;
+    padding-right: 75px;
+    border-color: black;
+    border-style: double;
+}
+
+label {
+    margin: 10px;
+    width: auto;
+    font-size: large;
+    color: white;
+
+}
+
+#admin_name,
+#admin_password {
+    font-size: medium;
+    font-family: 'Times New Roman', Times, serif;
+    height: 70px;
+    width: 275px;
+    border-color: 1px 1px 1px black;
+    border-radius: 10px;
+    padding-left: 10px;
+}
+
+input {
+    height: 40px;
+    padding-left: 4px;
+    border-radius: 7px;
+    margin-bottom: 5px;
+    color: white;
+    font-size: medium;
+    background-color: rgba(19, 19, 19, 0.481);
+
+}
+
+#Admin_login {
+    height: 35px;
+    font-size: large;
+    text-align: center;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    width: 120px;
+    background-color: rgb(78, 215, 236);
+    border-radius: 10px;
+    margin-top: 10px;
+    gap: 30px;
+}
+a {
+    text-decoration: none;
+    font-size: large;
+    color: white;
+    width: 200px;
+    margin-top: 20px;
+    padding-left: 20px;
+}
+

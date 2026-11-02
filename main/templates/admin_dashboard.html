@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Students Space</title>
+    <link rel="stylesheet" href="../static/css/adminpanel.css">
+</head>
+
+<body>
+    <div class="layout">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <span class="brand-mark" aria-hidden="true"></span>
+                <div>
+                    <strong>Students Space</strong>
+                    <small>Ask, learn, grow</small>
+                </div>
+            </div>
+
+            <nav class="nav" aria-label="Admin menu">
+                <a href="#dashboard" class="nav-link active" data-view="dashboard">Dashboard</a>
+                <a href="#add-teacher" class="nav-link" data-view="add-teacher">Add Teacher</a>
+            </nav>
+
+            <nav class="nav nav-bottom" aria-label="Account">
+                <a href="/logout" class="nav-link">Logout</a>
+            </nav>
+        </aside>
+
+        <!-- Main area -->
+        <div class="main">
+            <header class="topbar">
+                <h1 id="pageTitle">Admin Dashboard</h1>
+                <div class="admin-chip">
+                    <span class="avatar" aria-hidden="true">A</span>
+                    <span>Admin<small>Administrator</small></span>
+                </div>
+            </header>
+
+            <main class="content">
+
+                <!-- Messages from Flask: flash("Teacher added successfully.", "success") -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+
+                <!-- VIEW 1: Dashboard (shown by default) -->
+                <div class="view" id="view-dashboard" data-title="Admin Dashboard">
+                    <section class="banner">
+                        <h2>Welcome back, Admin!</h2>
+                        <p>Add teachers and keep track of the students and teachers on Students Space.</p>
+                        <span class="banner-college">Government Polytechnic, Srikakulam</span>
+                    </section>
+
+                    <!-- Counts: pass total_students and total_teachers from Flask -->
+                    <section class="stats" aria-label="Platform totals">
+                        <article class="stat-card">
+                            <span class="stat-icon stat-students" aria-hidden="true">S</span>
+                            <div>
+                                <strong class="stat-number" data-count="{{ total_students|default(0) }}">{{ total_students|default(0) }}</strong>
+                                <span class="stat-label">Total Students</span>
+                            </div>
+                        </article>
+                        <article class="stat-card">
+                            <span class="stat-icon stat-teachers" aria-hidden="true">T</span>
+                            <div>
+                                <strong class="stat-number" data-count="{{ total_teachers|default(0) }}">{{ total_teachers|default(0) }}</strong>
+                                <span class="stat-label">Total Teachers</span>
+                            </div>
+                        </article>
+                    </section>
+                </div>
+
+                <!-- VIEW 2: Add Teacher form (hidden until "Add Teacher" is clicked) -->
+                <div class="view" id="view-add-teacher" data-title="Add Teacher" hidden>
+                    <section class="card">
+                        <h2>Add Teacher</h2>
+                        <p class="card-sub">Create a teacher account so teachers can sign in and answer tagged questions.</p>
+
+                        <form action="" method="post" id="teacherForm" novalidate>
+                            <div class="form-grid">
+
+                                <div class="field">
+                                    <label for="teachername">Teacher Name</label>
+                                    <input type="text" id="teachername" name="teachername"
+                                        placeholder="Enter teacher name" autocomplete="off" required>
+                                    <span class="error" id="teachername-error" aria-live="polite"></span>
+                                </div>
+
+                                <div class="field">
+                                    <label for="teacheremail">Email</label>
+                                    <input type="email" id="teacheremail" name="teacheremail"
+                                        placeholder="Enter teacher email" autocomplete="off" required>
+                                    <span class="error" id="teacheremail-error" aria-live="polite"></span>
+                                </div>
+
+                                <div class="field">
+                                    <label for="teacherbranch">Branch</label>
+                                    <select name="teacherbranch" id="teacherbranch" required>
+                                        <option value="" selected disabled>Select branch</option>
+                                        <option value="CSE">Computer Engineering</option>
+                                        <option value="EEE">Electrical</option>
+                                        <option value="MECH">Mechanical</option>
+                                        <option value="CIVIL">Civil</option>
+                                        <option value="CCP">CCP</option>
+                                    </select>
+                                    <span class="error" id="teacherbranch-error" aria-live="polite"></span>
+                                </div>
+
+                                <div class="field">
+                                    <label for="password">Password</label>
+                                    <div class="password-wrap">
+                                        <input type="password" id="password" name="password"
+                                            placeholder="At least 6 characters" autocomplete="new-password" required>
+                                        <button type="button" class="toggle-password" data-target="password"
+                                            aria-label="Show password">Show</button>
+                                    </div>
+                                    <span class="error" id="password-error" aria-live="polite"></span>
+                                </div>
+
+                                <div class="field">
+                                    <label for="confirmpassword">Confirm Password</label>
+                                    <div class="password-wrap">
+                                        <!-- no name attribute: this field is only checked in the browser -->
+                                        <input type="password" id="confirmpassword" placeholder="Re-enter password"
+                                            autocomplete="new-password" required>
+                                        <button type="button" class="toggle-password" data-target="confirmpassword"
+                                            aria-label="Show confirm password">Show</button>
+                                    </div>
+                                    <span class="error" id="confirmpassword-error" aria-live="polite"></span>
+                                </div>
+
+                                <div class="field field-action">
+                                    <button type="submit" id="addteacher">Add Teacher</button>
+                                </div>
+                            </div>
+                            <p class="form-status" id="formStatus" role="status"></p>
+                        </form>
+                    </section>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <script src="../static/js/adminpanel.js"></script>
+</body>
+
+</html>
