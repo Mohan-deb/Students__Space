@@ -170,5 +170,34 @@ class QuestionDatabase:
                 question_id, question["student_id"]
             )
         return cursor.lastrowid
-
+    def get_question_wall(self,student_id,branch):
+        database = get_db()
+        cursor = database.execute("""
+                                  SELECT q.*,s.name AS student_name FROM questions AS q
+                                  JOIN students AS s ON q.student_id = s.id WHERE q.branch = ?
+                                  AND (q.question_type ='community' OR q.student_id = ?)
+                                  ORDER BY q.created_at DESC """,(branch,student_id))
+        return cursor.fetchall()
     
+    def get_teacher_question_wall(self, teacher_id, branch):
+        database = get_db()
+
+        cursor = database.execute(
+            """
+            SELECT
+                q.*,
+                s.name AS student_name
+            FROM questions AS q
+            JOIN students AS s ON q.student_id = s.id
+            WHERE q.branch = ?
+            AND (
+                q.question_type = 'community'
+                OR q.teacher_id = ?
+            )
+            ORDER BY q.created_at DESC
+            """,
+            (branch, teacher_id)
+        )
+
+        return cursor.fetchall()
+          

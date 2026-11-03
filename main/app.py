@@ -7,6 +7,9 @@ try:
     from exceptions import common_exceptions as ce
     from pathlib import Path
     from database.db import init_app, init_db
+    from flask import jsonify
+    from database.question_database import QuestionDatabase
+    
 except FileNotFoundError:
     pass
 except ModuleNotFoundError:
@@ -32,6 +35,7 @@ init_app(app)
 
 student_database = StudentDatabase()
 teacher_database = TeacherDatabase()
+question_database = QuestionDatabase()
 
 @app.route("/")
 def home():
@@ -144,6 +148,27 @@ def adminlogin():
     if request.method =="POST":
         return redirect(url_for("adminlogin"))
     return render_template("adminlogin.html")
+
+@app.route("/api/student/questions")
+def student_questions():
+    if "student_id" not in session:
+        return jsonify({"error":"Unauthorized"}),401
+    
+    questions = question_database.get_question_wall(
+        session["student_id"],
+                session["branch"]
+    )
+    return jsonify([dict(q) for q in questions])
+
+@app.route("/api/teacher/questions")
+def teacher_questions():
+    if "teacher_id" not in session:
+        return jsonify({"error":"Unauthorized"}),401
+    questions = question_database.get_teacher_question_wall(
+        session["teacher_id"],
+        session["branch"]
+    )
+    return jsonify([dict(q) for q in questions])
 
 
 if __name__ == "__main__":
