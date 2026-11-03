@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Student Space - Student Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename = 'css/student_dasshboard.css')}}">
 
@@ -67,7 +68,7 @@
                     <span>⚙</span> Settings
                 </a>
 
-                <a href="#logout" class="nav-link" id="logoutBtn">
+                <a href="{{ url_for('logout')}}" class="nav-link" id="logoutBtn">
                     <span>⇥</span> Logout
                 </a>
 
@@ -96,15 +97,15 @@
 
                 <button class="notification" id="notificationBtn">
                     ♧
-                    <b id="notificationCount">3</b>
+                    <b id="notificationCount">{{ unread_notifications }}</b>
                 </button>
 
                 <div class="user-area" id="userArea">
 
-                    <div class="user-avatar">R</div>
+                    <div class="user-avatar">{{ student.name[:1]|upper }}</div>
 
                     <div class="user-text">
-                        <strong id="headerStudentName">Rahul Kumar</strong>
+                        <strong id="headerStudentName">{{ student.name }}</strong>
                         <small>Student</small>
                     </div>
 
@@ -131,14 +132,14 @@
 
                         <div class="welcome-text">
                             <p>Welcome back,</p>
-                            <h2 id="welcomeStudentName">Rahul Kumar! 👋</h2>
+                            <h2 id="welcomeStudentName">{{ student.name }}! 👋</h2>
                             <span>Ask questions. Share knowledge. Be a better learner.</span>
                             <em>"A doubt clarified is a step towards progress."</em>
                         </div>
 
                         <div class="college">
                             <strong>Government Polytechnic<br>Srikakulam</strong>
-                            <small>Computer Engineering</small>
+                            <small>{{ student.branch_label }}</small>
                         </div>
 
                     </div>
@@ -149,7 +150,7 @@
                         <div class="stat">
                             <div class="stat-icon blue">💬</div>
                             <div>
-                                <strong id="askedCount">12</strong>
+                                <strong id="askedCount">{{ stats.asked }}</strong>
                                 <span>Questions Asked</span>
                             </div>
                         </div>
@@ -157,7 +158,7 @@
                         <div class="stat">
                             <div class="stat-icon green">✓</div>
                             <div>
-                                <strong id="answeredCount">8</strong>
+                                <strong id="answeredCount">{{ stats.answered }}</strong>
                                 <span>Answered</span>
                             </div>
                         </div>
@@ -165,7 +166,7 @@
                         <div class="stat">
                             <div class="stat-icon orange">◷</div>
                             <div>
-                                <strong id="pendingCount">4</strong>
+                                <strong id="pendingCount">{{ stats.pending }}</strong>
                                 <span>Pending</span>
                             </div>
                         </div>
@@ -173,7 +174,7 @@
                         <div class="stat">
                             <div class="stat-icon purple">♟</div>
                             <div>
-                                <strong id="givenCount">27</strong>
+                                <strong id="givenCount">{{ stats.answers_given }}</strong>
                                 <span>Answers Given</span>
                             </div>
                         </div>
@@ -221,18 +222,8 @@
                                 </div>
 
                                 <div class="announcement">
-                                    <b>📣 Welcome to Student Space!</b>
-                                    <small>Start asking, answering and sharing knowledge.</small>
-                                </div>
-
-                                <div class="announcement">
-                                    <b>▣ Internal Exams</b>
-                                    <small>II Year internal exams start from 20th September.</small>
-                                </div>
-
-                                <div class="announcement">
-                                    <b>★ Be an Active Learner</b>
-                                    <small>Help your peers by answering questions.</small>
+                                    <b>📣 Announcements</b>
+                                    <small>New announcements will appear here when they are published.</small>
                                 </div>
 
                             </section>
@@ -308,9 +299,9 @@
 
                         <select id="teacherSelect" disabled>
                             <option value="">Select teacher</option>
-                            <option>Mr. K. Srinivas</option>
-                            <option>Mrs. L. Madhuri</option>
-                            <option>Mr. R. Prasad</option>
+                            {% for teacher in teachers %}
+                            <option value="{{ teacher.id }}">{{ teacher.teacher_name }}</option>
+                            {% endfor %}
                         </select>
 
                         <div class="form-buttons">
@@ -352,29 +343,17 @@
                         </div>
                     </div>
 
-                    <div class="teacher-grid">
-
-                        <article class="teacher-card">
-                            <div class="teacher-avatar">KS</div>
-                            <h3>Mr. K. Srinivas</h3>
-                            <p>DBMS · Computer Networks</p>
-                            <button class="message-button">✉ Message</button>
+                    <div class="teacher-grid" id="teacherGrid">
+                        {% for teacher in teachers %}
+                        <article class="teacher-card" data-teacher-id="{{ teacher.id }}">
+                            <div class="teacher-avatar">{{ teacher.teacher_name[:2]|upper }}</div>
+                            <h3>{{ teacher.teacher_name }}</h3>
+                            <p>{{ teacher.branch }}</p>
+                            <button class="message-button" type="button">✉ Message</button>
                         </article>
-
-                        <article class="teacher-card">
-                            <div class="teacher-avatar">LM</div>
-                            <h3>Mrs. L. Madhuri</h3>
-                            <p>Operating Systems · Python</p>
-                            <button class="message-button">✉ Message</button>
-                        </article>
-
-                        <article class="teacher-card">
-                            <div class="teacher-avatar">RP</div>
-                            <h3>Mr. R. Prasad</h3>
-                            <p>Data Structures · Java</p>
-                            <button class="message-button">✉ Message</button>
-                        </article>
-
+                        {% else %}
+                        <p>No teacher accounts are available yet.</p>
+                        {% endfor %}
                     </div>
 
                 </section>
@@ -477,11 +456,11 @@
                         <div class="profile-big" id="profileAvatar">R</div>
 
                         <div class="profile-info">
-                            <div><small>Name</small><strong id="profileName">Rahul Kumar</strong></div>
+                            <div><small>Name</small><strong id="profileName">{{ student.name }}</strong></div>
                             <div><small>Role</small><strong>Student</strong></div>
-                            <div><small>Email</small><strong id="profileEmail">rahul@example.com</strong></div>
-                            <div><small>Branch</small><strong id="profileBranch">Computer Engineering</strong></div>
-                            <div><small>Year</small><strong id="profileYear">3rd Year</strong></div>
+                            <div><small>Email</small><strong id="profileEmail">{{ student.mail }}</strong></div>
+                            <div><small>Branch</small><strong id="profileBranch">{{ student.branch_label }}</strong></div>
+                            <div><small>Year</small><strong id="profileYear">{{ student.year_label }}</strong></div>
                             <div><small>College</small><strong>Government Polytechnic Srikakulam</strong></div>
                         </div>
 
@@ -500,21 +479,18 @@
                             <label>
                                 <span>Branch</span>
                                 <select id="editBranch" required>
-                                    <option value="Computer Engineering">Computer Engineering</option>
-                                    <option value="Mechanical Engineering">Mechanical Engineering</option>
-                                    <option value="Electrical And Electronic Engineering">Electrical And Electronic
-                                        Engineering</option>
-                                    <option value="Civil Engineering">Civil Engineering</option>
-                                    <option value="Commercial and Computer Engineering">Commercial and Computer
-                                        Engineering</option>
+                                    <option value="CME">Computer Engineering</option>
+                                    <option value="EEE">Electrical and Electronic Engineering</option>
+                                    <option value="CIVIL">Civil Engineering</option>
+                                    <option value="CCP">Commercial and Computer Engineering</option>
                                 </select>
                             </label>
                             <label>
                                 <span>Year</span>
                                 <select id="editYear" required>
-                                    <option value="1st Year">1st Year</option>
-                                    <option value="2nd Year">2nd Year</option>
-                                    <option value="3rd Year">3rd Year</option>
+                                    <option value="1">1st Year</option>
+                                    <option value="2">2nd Year</option>
+                                    <option value="3">3rd Year</option>
                                 </select>
                             </label>
                         </div>
@@ -704,43 +680,22 @@
                 });
             });
 
-            const form = document.getElementById('changePasswordForm');
-            const message = document.getElementById('passwordMessage');
-            if (form) {
-                form.addEventListener('submit', function (event) {
-                    event.preventDefault();
-                    const current = document.getElementById('currentPassword').value;
-                    const next = document.getElementById('newPassword').value;
-                    const confirm = document.getElementById('confirmPassword').value;
-                    message.className = 'password-message show';
-
-                    if (!current || !next || !confirm) {
-                        message.classList.add('error');
-                        message.textContent = 'Please fill in all password fields.';
-                        return;
-                    }
-                    if (next.length < 8) {
-                        message.classList.add('error');
-                        message.textContent = 'New password must contain at least 8 characters.';
-                        return;
-                    }
-                    if (next !== confirm) {
-                        message.classList.add('error');
-                        message.textContent = 'New password and confirmation do not match.';
-                        return;
-                    }
-
-                    message.classList.add('success');
-                    message.textContent = 'Password change request is ready. Connect this form to Flask/MySQL for the real password update.';
-                    form.reset();
-                });
-            }
         })();
     </script>
     <script>
         const studentLoginUrl = "{{ url_for('student_login') }}";
+        const logoutUrl = "{{ url_for('logout') }}";
+        window.studentSpaceUrls = {
+            dashboard: "{{ url_for('student_dashboard_data') }}",
+            questions: "{{ url_for('create_question') }}",
+            answerTemplate: "{{ url_for('add_student_answer', question_id=0) }}",
+            messages: "{{ url_for('send_teacher_message') }}",
+            profile: "{{ url_for('update_student_profile') }}",
+            changePassword: "{{ url_for('change_password') }}",
+            notificationReadTemplate: "{{ url_for('mark_notification_read', role='student', notification_id=0) }}",
+            notificationsReadAll: "{{ url_for('mark_all_notifications_read', role='student') }}"
+        };
     </script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="{{ url_for('static', filename = 'js/student_dashboard.js')}}"></script>
 
 </body>

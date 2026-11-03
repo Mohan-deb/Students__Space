@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | Students Space</title>
-    <link rel="stylesheet" href="../static/css/adminpanel.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/adminpanel.css') }}">
 </head>
 
 <body>
@@ -86,6 +86,7 @@
                         <p class="card-sub">Create a teacher account so teachers can sign in and answer tagged questions.</p>
 
                         <form action="" method="post" id="teacherForm" novalidate>
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <div class="form-grid">
 
                                 <div class="field">
@@ -151,7 +152,7 @@
         </div>
     </div>
 
-    <script src="../static/js/adminpanel.js"></script>
+    <script src="{{ url_for('static', filename='js/adminpanel.js') }}"></script>
 </body>
 
 </html>

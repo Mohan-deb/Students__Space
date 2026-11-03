@@ -54,8 +54,8 @@ label {
 
 }
 
-#admin_name,
-#admin_password {
+#adminname,
+#adminpassword {
     font-size: medium;
     font-family: 'Times New Roman', Times, serif;
     height: 70px;
@@ -76,7 +76,7 @@ input {
 
 }
 
-#Admin_login {
+#adminlogin {
     height: 35px;
     font-size: large;
     text-align: center;
@@ -87,6 +87,7 @@ input {
     margin-top: 10px;
     gap: 30px;
 }
+
 a {
     text-decoration: none;
     font-size: large;
@@ -96,3 +97,9 @@ a {
     padding-left: 20px;
 }
 
+.login-message {
+    color: white;
+    background: rgba(120, 0, 0, 0.7);
+    padding: 8px 12px;
+    border-radius: 8px;
+}

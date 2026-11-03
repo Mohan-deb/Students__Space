@@ -1,116 +1,112 @@
 
 document.addEventListener("DOMContentLoaded", function () {
 
-    const STORAGE_KEY = "studentSpaceQuestions";
-    const CURRENT_STUDENT = "Rahul";
+    const urls = window.studentSpaceUrls;
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+    let questions = [];
+    let teachers = [];
+    let notifications = [];
+    let statistics = {};
+    let profile = null;
 
-    const defaultQuestions = [
-        {
-            id: 1,
-            title: "Why is normalization required in DBMS?",
-            subject: "DBMS",
-            description: "I want to understand why normalization is needed and how it reduces redundancy.",
-            author: "Priya",
-            time: "2 hours ago",
-            answers: 3,
-            status: "answered",
-            teacherTagged: false
-        },
-        {
-            id: 2,
-            title: "Difference between TCP and UDP?",
-            subject: "Computer Networks",
-            description: "Can someone explain the main differences between TCP and UDP with a simple example?",
-            author: CURRENT_STUDENT,
-            time: "5 hours ago",
-            answers: 1,
-            status: "unanswered",
-            teacherTagged: false
-        },
-        {
-            id: 3,
-            title: "How does virtual memory work?",
-            subject: "Operating Systems",
-            description: "How does an operating system use virtual memory?",
-            author: "Suresh",
-            time: "1 day ago",
-            answers: 4,
-            status: "answered",
-            teacherTagged: false
-        },
-        {
-            id: 4,
-            title: "Can someone explain polymorphism with an example?",
-            subject: "Java",
-            description: "I understand the definition but need a simple practical example.",
-            author: "Anjali",
-            time: "1 day ago",
-            answers: 2,
-            status: "answered",
-            teacherTagged: true
-        },
-        {
-            id: 5,
-            title: "What is the difference between primary key and foreign key?",
-            subject: "DBMS",
-            description: "I am confused about where primary keys and foreign keys are used.",
-            author: "Deepak",
-            time: "2 days ago",
-            answers: 0,
-            status: "unanswered",
-            teacherTagged: false
+    async function apiRequest(url, method = "GET", body = null) {
+        const options = { method, credentials: "same-origin", headers: {} };
+        if (body !== null) {
+            options.headers["Content-Type"] = "application/json";
+            options.headers["X-CSRF-Token"] = csrfToken;
+            options.body = JSON.stringify(body);
         }
-    ];
-
-    let questions = JSON.parse(localStorage.getItem(STORAGE_KEY));
-
-    if (!Array.isArray(questions) || questions.length === 0) {
-        questions = defaultQuestions;
-        saveQuestions();
+        const response = await fetch(url, options);
+        let result = {};
+        try { result = await response.json(); } catch (error) { }
+        if (!response.ok) throw new Error(result.error || "The request could not be completed.");
+        return result;
     }
 
+    function displayTime(value) {
+        if (!value) return "";
+        const date = new Date(value.replace(" ", "T") + "Z");
+        if (Number.isNaN(date.getTime())) return value;
+        const minutes = Math.floor((Date.now() - date.getTime()) / 60000);
+        if (minutes < 1) return "Just now";
+        if (minutes < 60) return minutes + " min ago";
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return hours + " hour" + (hours === 1 ? "" : "s") + " ago";
+        const days = Math.floor(hours / 24);
+        if (days < 7) return days + " day" + (days === 1 ? "" : "s") + " ago";
+        return date.toLocaleDateString();
+    }
 
-    /* ================= BASIC HELPERS ================= */
+    function branchLabel(value) {
+        return {
+            CME: "Computer Engineering",
+            EEE: "Electrical and Electronic Engineering",
+            CIVIL: "Civil Engineering",
+            CCP: "Commercial and Computer Engineering"
+        }[value] || value || "";
+    }
 
-    function saveQuestions() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(questions));
+    function yearLabel(value) {
+        return { "1": "1st Year", "2": "2nd Year", "3": "3rd Year" }[value] || value || "";
+    }
+
+    async function loadDashboard() {
+        const data = await apiRequest(urls.dashboard);
+        profile = data.profile;
+        questions = data.questions;
+        teachers = data.teachers;
+        notifications = data.notifications;
+        statistics = data.statistics;
+        renderProfile();
+        renderTeachers();
+        renderDashboard();
+        renderWall();
+        renderMyQuestions();
+        updateNotificationCount();
+        if (document.querySelector(".view.active-view").id === "notificationsView") {
+            renderNotifications();
+        }
+    }
+
+    function renderTeachers() {
+        const grid = document.getElementById("teacherGrid");
+        const select = document.getElementById("teacherSelect");
+        if (select) {
+            select.innerHTML = '<option value="">Select teacher</option>' +
+                teachers.map(function (teacher) {
+                    return `<option value="${teacher.id}">${escapeHTML(teacher.teacher_name)}</option>`;
+                }).join("");
+        }
+        if (!grid) return;
+        grid.innerHTML = teachers.length ? teachers.map(function (teacher) {
+            return `<article class="teacher-card" data-teacher-id="${teacher.id}">
+                <div class="teacher-avatar">${escapeHTML(teacher.teacher_name.slice(0, 2).toUpperCase())}</div>
+                <h3>${escapeHTML(teacher.teacher_name)}</h3>
+                <p>${escapeHTML(teacher.branch)}</p>
+                <button class="message-button" type="button">✉ Message</button>
+            </article>`;
+        }).join("") : '<p>No teacher accounts are available yet.</p>';
     }
 
     /* ================= PROFILE DATA ================= */
 
-    const PROFILE_KEY = "studentSpaceProfile";
-
-    const defaultProfile = {
-        name: "Rahul Kumar",
-        email: "rahul@example.com",
-        branch: "Computer Engineering",
-        year: "3rd Year"
-    };
-
-    let profile = JSON.parse(localStorage.getItem(PROFILE_KEY));
-
-    if (!profile || typeof profile !== "object") {
-        profile = { ...defaultProfile };
-        saveProfile();
-    }
-
-    function saveProfile() {
-        localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
-    }
-
     function renderProfile() {
+        if (!profile) return;
         document.getElementById("profileName").textContent = profile.name;
-        document.getElementById("profileEmail").textContent = profile.email;
-        document.getElementById("profileBranch").textContent = profile.branch;
-        document.getElementById("profileYear").textContent = profile.year;
+        document.getElementById("profileEmail").textContent = profile.mail;
+        document.getElementById("profileBranch").textContent = branchLabel(profile.branch);
+        document.getElementById("profileYear").textContent = yearLabel(profile.year);
         document.getElementById("profileAvatar").textContent = profile.name.charAt(0).toUpperCase();
         document.getElementById("headerStudentName").textContent = profile.name;
         document.getElementById("welcomeStudentName").textContent = profile.name + "! 👋";
+        document.querySelector(".user-avatar").textContent = profile.name.charAt(0).toUpperCase();
+        document.querySelector(".college small").textContent = branchLabel(profile.branch);
     }
 
     function openProfileEditor() {
+        if (!profile) return;
         document.getElementById("editName").value = profile.name;
-        document.getElementById("editEmail").value = profile.email;
+        document.getElementById("editEmail").value = profile.mail;
         document.getElementById("editBranch").value = profile.branch;
         document.getElementById("editYear").value = profile.year;
         document.getElementById("profileEditForm").hidden = false;
@@ -168,7 +164,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const tags = `
             <div class="tags">
                 <span>${escapeHTML(question.subject)}</span>
-                <span>Computer Engineering</span>
+                ${question.teacherTagged && question.teacher_name
+                    ? `<span>Tagged to ${escapeHTML(question.teacher_name)}</span>` : ""}
             </div>
         `;
 
@@ -179,12 +176,17 @@ document.addEventListener("DOMContentLoaded", function () {
         const canStudentAnswer =
             includeAnswerButton &&
             question.status === "unanswered" &&
-            question.author !== CURRENT_STUDENT &&
+            question.student_id !== profile.id &&
             !question.teacherTagged;
 
         const answerButton = canStudentAnswer
-            ? `<button class="answer-button" data-answer-id="${question.id}">Answer</button>`
+            ? `<button class="answer-button" type="button" data-answer-id="${question.id}">Answer</button>`
             : "";
+
+        const answers = (question.answer_records || []).map(function (answer) {
+            return `<div class="answer-preview"><strong>${escapeHTML(answer.author_name)}</strong>
+                <p>${escapeHTML(answer.content)}</p><small>${escapeHTML(displayTime(answer.created_at))}</small></div>`;
+        }).join("");
 
         return `
             <article class="question-card">
@@ -195,11 +197,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 <div class="question-main">
                     <h3>${escapeHTML(question.title)}</h3>
                     ${tags}
+                    <p class="question-description">${escapeHTML(question.description)}</p>
                     <p>
                         Posted by <b>${escapeHTML(question.author)}</b>
-                        · ${escapeHTML(question.time)}
+                        · ${escapeHTML(displayTime(question.time))}
                         · ${question.answers} answer${question.answers === 1 ? "" : "s"}
                     </p>
+                    ${answers}
                 </div>
 
                 ${questionStatus(question)}
@@ -284,19 +288,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const recent = questions.slice(0, 5);
 
-        document.getElementById("recentQuestions").innerHTML =
-            recent.map(q => questionCard(q, false)).join("");
+        document.getElementById("recentQuestions").innerHTML = recent.length
+            ? recent.map(q => questionCard(q, false)).join("")
+            : '<p>No questions have been posted yet.</p>';
 
-        const myQuestions = questions.filter(q => q.author === CURRENT_STUDENT);
-
-        document.getElementById("askedCount").textContent =
-            12 + myQuestions.length;
-
-        document.getElementById("answeredCount").textContent =
-            8 + myQuestions.filter(q => q.status === "answered").length;
-
-        document.getElementById("pendingCount").textContent =
-            4 + myQuestions.filter(q => q.status === "unanswered").length;
+        document.getElementById("askedCount").textContent = statistics.asked || 0;
+        document.getElementById("answeredCount").textContent = statistics.answered || 0;
+        document.getElementById("pendingCount").textContent = statistics.pending || 0;
+        document.getElementById("givenCount").textContent = statistics.answers_given || 0;
     }
 
 
@@ -417,7 +416,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.getElementById("questionForm").addEventListener(
         "submit",
-        function (event) {
+        async function (event) {
 
             event.preventDefault();
 
@@ -430,30 +429,26 @@ document.addEventListener("DOMContentLoaded", function () {
                 showToast("Please fill all the fields.");
                 return;
             }
+            if (tagTeacher.checked && !teacherSelect.value) {
+                showToast("Select the teacher you want to tag.");
+                return;
+            }
 
-            const newQuestion = {
-                id: Date.now(),
-                title: title,
-                subject: subject,
-                description: description,
-                author: CURRENT_STUDENT,
-                time: "Just now",
-                answers: 0,
-                status: "unanswered",
-                teacherTagged: tagTeacher.checked,
-                teacher: teacherSelect.value
-            };
-
-            questions.unshift(newQuestion);
-
-            saveQuestions();
-
-            event.target.reset();
-            teacherSelect.disabled = true;
-
-            showToast("Question posted successfully.");
-
-            openView("my-questions");
+            try {
+                await apiRequest(urls.questions, "POST", {
+                    title: title,
+                    subject: subject,
+                    description: description,
+                    teacher_id: tagTeacher.checked ? teacherSelect.value : null
+                });
+                event.target.reset();
+                teacherSelect.disabled = true;
+                await loadDashboard();
+                showToast("Question posted successfully.");
+                openView("my-questions");
+            } catch (error) {
+                showToast(error.message);
+            }
         }
     );
 
@@ -462,7 +457,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function renderMyQuestions() {
 
-        const mine = questions.filter(q => q.author === CURRENT_STUDENT);
+        const mine = questions.filter(q => q.student_id === profile.id);
 
         const container = document.getElementById("myQuestions");
 
@@ -486,9 +481,10 @@ document.addEventListener("DOMContentLoaded", function () {
                         <h3>${escapeHTML(question.title)}</h3>
                         <p>
                             ${escapeHTML(question.subject)}
-                            · ${escapeHTML(question.time)}
+                            · ${escapeHTML(displayTime(question.time))}
                             · ${question.answers} answer${question.answers === 1 ? "" : "s"}
                         </p>
+                        <p class="question-description">${escapeHTML(question.description)}</p>
                     </div>
 
                     ${questionStatus(question)}
@@ -507,13 +503,13 @@ document.addEventListener("DOMContentLoaded", function () {
     function openAnswerModal(questionId) {
 
         const question =
-            questions.find(q => q.id === questionId);
+            questions.find(q => Number(q.id) === Number(questionId));
 
         if (!question) return;
 
         // Extra protection: the UI must never allow a student to answer
         // their own question or a question that has a teacher tagged.
-        if (question.author === CURRENT_STUDENT) {
+        if (question.student_id === profile.id) {
             showToast("You cannot answer your own question.");
             return;
         }
@@ -546,7 +542,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.getElementById("submitAnswer").addEventListener(
         "click",
-        function () {
+        async function () {
 
             const answer =
                 document.getElementById("answerText").value.trim();
@@ -557,22 +553,22 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             const question =
-                questions.find(q => q.id === selectedQuestionId);
+                questions.find(q => Number(q.id) === Number(selectedQuestionId));
 
             if (!question) return;
 
-            question.answers += 1;
-            question.status = "answered";
-
-            saveQuestions();
-
-            document.getElementById("answerModal")
-                .classList.remove("open");
-
-            showToast("Your answer was added.");
-
-            renderWall();
-            renderDashboard();
+            try {
+                await apiRequest(
+                    urls.answerTemplate.replace("/0/answers", `/${question.id}/answers`),
+                    "POST",
+                    { content: answer }
+                );
+                document.getElementById("answerModal").classList.remove("open");
+                await loadDashboard();
+                showToast("Your answer was added.");
+            } catch (error) {
+                showToast(error.message);
+            }
         }
     );
 
@@ -591,11 +587,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     /* ================= TEACHERS / MESSAGES ================= */
 
-    let selectedTeacher = "";
-    const MESSAGE_KEY = "studentSpaceMessages";
+    let selectedTeacherId = null;
 
-    function openTeacherMessage(teacherName) {
-        selectedTeacher = teacherName;
+    function openTeacherMessage(teacherId, teacherName) {
+        selectedTeacherId = teacherId;
 
         document.getElementById("messageTeacherName").textContent =
             teacherName;
@@ -610,20 +605,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function closeTeacherMessage() {
         document.getElementById("messageModal").classList.remove("open");
-        selectedTeacher = "";
+        selectedTeacherId = null;
     }
 
-    document.querySelectorAll(".message-button").forEach(
-        function (button) {
-
-            button.addEventListener("click", function () {
-                const teacher = button.closest(".teacher-card")
-                    .querySelector("h3").textContent.trim();
-
-                openTeacherMessage(teacher);
-            });
-        }
-    );
+    document.getElementById("teacherGrid").addEventListener("click", function (event) {
+        const button = event.target.closest(".message-button");
+        if (!button) return;
+        const card = button.closest(".teacher-card");
+        openTeacherMessage(card.dataset.teacherId, card.querySelector("h3").textContent.trim());
+    });
 
     document.getElementById("closeMessageModal")
         .addEventListener("click", closeTeacherMessage);
@@ -639,34 +629,29 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
     document.getElementById("sendTeacherMessage")
-        .addEventListener("click", function () {
+        .addEventListener("click", async function () {
             const text = document.getElementById("teacherMessageText")
                 .value.trim();
 
-            if (!selectedTeacher) return;
+            if (!selectedTeacherId) return;
 
             if (!text) {
                 showToast("Write a message first.");
                 return;
             }
 
-            const messages = JSON.parse(
-                localStorage.getItem(MESSAGE_KEY) || "[]"
-            );
-
-            messages.push({
-                id: Date.now(),
-                from: CURRENT_STUDENT,
-                to: selectedTeacher,
-                message: text,
-                time: new Date().toLocaleString()
-            });
-
-            localStorage.setItem(MESSAGE_KEY, JSON.stringify(messages));
-
-            const teacher = selectedTeacher;
-            closeTeacherMessage();
-            showToast("Message sent to " + teacher + ".");
+            const teacher = document.getElementById("messageTeacherName").textContent;
+            try {
+                await apiRequest(urls.messages, "POST", {
+                    teacher_id: selectedTeacherId,
+                    content: text
+                });
+                closeTeacherMessage();
+                await loadDashboard();
+                showToast("Message sent to " + teacher + ".");
+            } catch (error) {
+                showToast(error.message);
+            }
         });
 
 
@@ -750,7 +735,7 @@ document.addEventListener("DOMContentLoaded", function () {
         closeProfileEditor();
     });
 
-    document.getElementById("profileEditForm").addEventListener("submit", function (event) {
+    document.getElementById("profileEditForm").addEventListener("submit", async function (event) {
         event.preventDefault();
 
         const name = document.getElementById("editName").value.trim();
@@ -763,82 +748,69 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        profile = { name, email, branch, year };
-        saveProfile();
-        renderProfile();
-        closeProfileEditor();
-        showToast("Profile updated successfully.");
+        try {
+            const result = await apiRequest(urls.profile, "POST", { name, email, branch, year });
+            profile = result.profile;
+            renderProfile();
+            closeProfileEditor();
+            showToast("Profile updated successfully.");
+        } catch (error) {
+            showToast(error.message);
+        }
     });
 
 
     /* ================= NOTIFICATIONS ================= */
 
-    const NOTIFICATIONS_KEY = "studentSpaceNotifications";
-
-    const defaultNotifications = [
-        { id: 1, type: "answer", icon: "💬", title: "Someone answered your question", text: "Your question about TCP vs UDP received a new answer.", time: "10 min ago", read: false },
-        { id: 2, type: "teacher", icon: "👨‍🏫", title: "Teacher responded", text: "Mr. K. Srinivas responded to a question you tagged him in.", time: "1 hour ago", read: false },
-        { id: 3, type: "announcement", icon: "📢", title: "New college announcement", text: "Internal exams start from 20th September 2026.", time: "Yesterday", read: false }
-    ];
-
-    function getNotifications() {
-        const saved = localStorage.getItem(NOTIFICATIONS_KEY);
-        if (saved) {
-            try {
-                return JSON.parse(saved);
-            } catch (error) { }
-        }
-        localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(defaultNotifications));
-        return [...defaultNotifications];
-    }
-
-    function saveNotifications(items) {
-        localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(items));
-    }
-
     function renderNotifications() {
         const list = document.getElementById("notificationsList");
         if (!list) return;
-
-        const items = getNotifications();
-
-        if (!items.length) {
+        if (!notifications.length) {
             list.innerHTML = `<div class="notifications-empty"><div>🔔</div><h3>No notifications</h3><p>You're all caught up.</p></div>`;
             return;
         }
 
-        list.innerHTML = items.map(function (item) {
+        list.innerHTML = notifications.map(function (item) {
+            const icon = item.kind === "tagged_question" ? "👨‍🏫" :
+                item.kind === "student_message" ? "✉" : "💬";
             return `
-                <article class="notification-item ${item.read ? "read" : "unread"}" data-notification-id="${item.id}">
-                    <div class="notification-item-icon">${item.icon}</div>
+                <article class="notification-item ${item.is_read ? "read" : "unread"}" data-notification-id="${item.id}">
+                    <div class="notification-item-icon">${icon}</div>
                     <div class="notification-item-content">
                         <div class="notification-item-top">
                             <h3>${escapeHTML(item.title)}</h3>
-                            <span>${escapeHTML(item.time)}</span>
+                            <span>${escapeHTML(displayTime(item.created_at))}</span>
                         </div>
-                        <p>${escapeHTML(item.text)}</p>
+                        <p>${escapeHTML(item.content)}</p>
                     </div>
-                    ${item.read ? "" : '<span class="notification-dot" title="Unread"></span>'}
+                    ${item.is_read ? "" : '<span class="notification-dot" title="Unread"></span>'}
                 </article>`;
         }).join("");
 
         list.querySelectorAll(".notification-item").forEach(function (item) {
-            item.addEventListener("click", function () {
-                const id = Number(item.dataset.notificationId);
-                const notifications = getNotifications();
-                const selected = notifications.find(function (n) { return n.id === id; });
-                if (selected && !selected.read) {
-                    selected.read = true;
-                    saveNotifications(notifications);
+            item.addEventListener("click", async function () {
+                const selected = notifications.find(function (entry) {
+                    return Number(entry.id) === Number(item.dataset.notificationId);
+                });
+                if (!selected || selected.is_read) return;
+                try {
+                    await apiRequest(
+                        urls.notificationReadTemplate.replace("/0/read", `/${selected.id}/read`),
+                        "POST",
+                        {}
+                    );
+                    selected.is_read = 1;
                     updateNotificationCount();
                     renderNotifications();
+                } catch (error) {
+                    showToast(error.message);
                 }
             });
         });
     }
 
     function updateNotificationCount() {
-        const count = getNotifications().filter(function (item) { return !item.read; }).length;
+        const count = notifications.filter(function (item) { return !item.is_read; }).length;
         const badge = document.getElementById("notificationCount");
         badge.textContent = count;
         badge.style.display = count ? "block" : "none";
@@ -848,14 +820,16 @@ document.addEventListener("DOMContentLoaded", function () {
         openView("notifications");
     });
 
-    document.getElementById("markAllNotificationsRead").addEventListener("click", function () {
-        const notifications = getNotifications().map(function (item) {
-            return { ...item, read: true };
-        });
-        saveNotifications(notifications);
-        updateNotificationCount();
-        renderNotifications();
-        showToast("All notifications marked as read.");
+    document.getElementById("markAllNotificationsRead").addEventListener("click", async function () {
+        try {
+            await apiRequest(urls.notificationsReadAll, "POST", {});
+            notifications.forEach(function (item) { item.is_read = 1; });
+            updateNotificationCount();
+            renderNotifications();
+            showToast("All notifications marked as read.");
+        } catch (error) {
+            showToast(error.message);
+        }
     });
 
 
@@ -870,31 +844,50 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     );
 
+    document.getElementById("menuLogout").addEventListener("click", function () {
+        window.location.href = logoutUrl;
+    });
 
-    /* ================= LOGOUT ================= */
-    function logout() {
+    document.getElementById("changePasswordForm").addEventListener("submit", async function (event) {
+        event.preventDefault();
+        const currentPassword = document.getElementById("currentPassword").value;
+        const newPassword = document.getElementById("newPassword").value;
+        const confirmPassword = document.getElementById("confirmPassword").value;
+        const message = document.getElementById("passwordMessage");
+        message.className = "password-message show";
 
-        showToast("Logging out...");
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            message.classList.add("error");
+            message.textContent = "Please fill in all password fields.";
+            return;
+        }
+        if (newPassword.length < 8 || newPassword !== confirmPassword) {
+            message.classList.add("error");
+            message.textContent = newPassword.length < 8
+                ? "New password must contain at least 8 characters."
+                : "New password and confirmation do not match.";
+            return;
+        }
 
-        setTimeout(function () {
-            window.location.href = studentLoginUrl;
-        }, 700);
-    }
-
-    document.getElementById("logoutBtn")
-        .addEventListener("click", function (event) {
-            event.preventDefault();
-            logout();
-        });
-
-    document.getElementById("menuLogout")
-        .addEventListener("click", logout);
+        try {
+            await apiRequest(urls.changePassword, "POST", {
+                current_password: currentPassword,
+                new_password: newPassword
+            });
+            message.classList.add("success");
+            message.textContent = "Password changed successfully.";
+            event.target.reset();
+        } catch (error) {
+            message.classList.add("error");
+            message.textContent = error.message;
+        }
+    });
 
 
     /* ================= INITIAL LOAD ================= */
 
-    renderProfile();
-    renderDashboard();
-    updateNotificationCount();
+    loadDashboard().catch(function (error) {
+        showToast(error.message);
+    });
 
 });

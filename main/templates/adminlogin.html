@@ -12,15 +12,21 @@
     <div class="flex-container">
 
         <form action="" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+            <p class="login-message {{ category }}" role="alert">{{ message }}</p>
+            {% endfor %}
+            {% endwith %}
             <fieldset>
                 <div class="flex-container2">
-                    <label for="admin_name">UserName:</label>
-                    <input type="text" id="admin_name" name="admin_name" required>
-                    <label for="admin_password">Password:</label>
-                    <input type="password" id="admin_password" name="admin_password">
+                    <label for="adminname">UserName:</label>
+                    <input type="text" id="adminname" name="adminname" required>
+                    <label for="adminpassword">Password:</label>
+                    <input type="password" id="adminpassword" name="adminpassword">
                 </div>
                 <div class="flex-container4">
-                    <button type="submit" id="Admin_login">Login</button>
+                    <button type="submit" id="adminlogin">Login</button>
                 </div>
             </fieldset>
         </form>

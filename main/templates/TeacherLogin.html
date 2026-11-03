@@ -19,6 +19,7 @@
 
         <div class="flex-container2">
             <form action="" method="post" id="TeacherForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <fieldset>
                     <div class=" flex-container2">
                         <label for=" userId">Email:</label>
