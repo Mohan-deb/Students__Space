@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/adminLogin.css') }}">
+</head>
+
+<body>
+    <div class="flex-container">
+
+        <form action="" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+            <p class="login-message {{ category }}" role="alert">{{ message }}</p>
+            {% endfor %}
+            {% endwith %}
+            <fieldset>
+                <div class="flex-container2">
+                    <label for="adminname">UserName:</label>
+                    <input type="text" id="adminname" name="adminname" required>
+                    <label for="adminpassword">Password:</label>
+                    <input type="password" id="adminpassword" name="adminpassword">
+                </div>
+                <div class="flex-container4">
+                    <button type="submit" id="adminlogin">Login</button>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,52 @@
+
+# =========================
+# Python generated files
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+
+# =========================
+# Python virtual environments
+# =========================
+venv/
+.venv/
+env/
+
+# =========================
+# Environment variables
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# SQLite databases
+# =========================
+*.db
+*.sqlite
+*.sqlite3
+
+# =========================
+# Logs
+# =========================
+*.log
+
+# =========================
+# IDE and editor files
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# Operating system files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Testing and coverage
+# =========================
+.pytest_cache/
+.coverage
+htmlcov/

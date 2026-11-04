@@ -13,6 +13,7 @@
         <h2>Student Space</h2>
         <h3>Create Your Login Credentials</h3>
         <form action="" method="post" id="signupform">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <fieldset>
                 <div class="flex-items">
                     <label for="createuser">Create Username:</label>
@@ -76,6 +77,10 @@
 
     if (message === "exists") {
         alert("Student PIN or email already exists!");
+    } else if (message === "passwordmismatch") {
+        alert("The passwords do not match.");
+    } else if (message === "invalid") {
+        alert("Please provide valid account details.");
     }
 </script>
 

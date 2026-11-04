@@ -19,6 +19,7 @@
 
         <div class="flex-container2">
             <form action="" method="post" id="TeacherForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <fieldset>
                     <div class=" flex-container2">
                         <label for=" userId">Email:</label>
@@ -38,5 +39,7 @@
         </div>
     </div>
 </body>
+
+<script src="{{ url_for('static', filename='js/check_user_credentials.js')}}"></script>
 
 </html>

@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <meta name="description" content="Student Space teacher dashboard">
   <title>Student Space | Teacher Dashboard</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/teacher_dashboard.css')}}">
@@ -12,8 +13,8 @@
 <body>
   <aside class="sidebar" id="sidebar">
     <div class="brand">
-      <img src="students_space_logo.png" alt="Student Space logo" class="brand-logo"
-        onerror="this.style.display='none'">
+      <img src="{{ url_for('static', filename='images/student_icon.png') }}" alt="Student Space logo"
+        class="brand-logo">
       <div>
         <h1>Student Space</h1>
         <p>Ask · Learn · Grow</p>
@@ -25,20 +26,22 @@
       <a href="#question-wall" class="nav-link" data-view="question-wall"><span class="nav-icon">▤</span>Question
         Wall</a>
       <a href="#tagged-questions" class="nav-link" data-view="tagged-questions"><span class="nav-icon">@</span>Tagged
-        Questions <span class="nav-badge">5</span></a>
+        Questions <span class="nav-badge" id="taggedBadge">{{ stats.tagged }}</span></a>
       <a href="#answered-questions" class="nav-link" data-view="answered-questions"><span
           class="nav-icon">✓</span>Answered Questions</a>
+      <a href="#messages" class="nav-link" data-view="messages"><span class="nav-icon">✉</span>Messages
+        <span class="nav-badge" id="messageBadge">{{ message_count }}</span></a>
       <a href="#my-subjects" class="nav-link" data-view="my-subjects"><span class="nav-icon">▣</span>My Subjects</a>
     </nav>
     <p class="nav-label account-label">PERSONAL</p>
     <nav class="nav-list" aria-label="Personal settings">
       <a href="#notifications" class="nav-link" data-view="notifications"><span class="nav-icon">♧</span>Notifications
-        <span class="nav-badge alert">3</span></a>
+        <span class="nav-badge alert" id="notificationBadge">{{ unread_notifications }}</span></a>
       <a href="#settings" class="nav-link" data-view="settings"><span class="nav-icon">⚙</span>Settings</a>
     </nav>
     <div class="sidebar-footer">
-      <div class="teacher-mini-avatar">T</div>
-      <div><strong>Teacher Name</strong><small>Faculty account</small></div>
+      <div class="teacher-mini-avatar">{{ teacher.teacher_name[:1]|upper }}</div>
+      <div><strong>{{ teacher.teacher_name }}</strong><small>Faculty account</small></div>
       <span class="online-dot"></span>
     </div>
   </aside>
@@ -52,15 +55,13 @@
         <label class="search-box"><span>⌕</span><input id="searchInput" type="search" placeholder="Search questions..."
             aria-label="Search dashboard"></label>
         <button class="icon-button notification-button" data-view="notifications"
-          aria-label="Notifications">♧<i>3</i></button>
+          aria-label="Notifications">♧<i id="topNotificationCount">{{ unread_notifications }}</i></button>
         <div class="profile-wrap">
           <button class="profile" id="profileButton" type="button" aria-expanded="false" aria-controls="profileMenu">
-            <span class="profile-avatar">T</span><span class="profile-copy"><strong>Teacher
-                Name</strong><small>Teacher</small></span><span class="profile-chevron">⌄</span>
+            <span class="profile-avatar">{{ teacher.teacher_name[:1]|upper }}</span><span class="profile-copy"><strong>{{ teacher.teacher_name }}</strong><small>Teacher</small></span><span class="profile-chevron">⌄</span>
           </button>
           <div class="profile-menu" id="profileMenu" hidden>
-            <div class="profile-menu-head"><span class="profile-avatar large">T</span><span><strong>Teacher
-                  Name</strong><small>Teacher account</small></span></div>
+            <div class="profile-menu-head"><span class="profile-avatar large">{{ teacher.teacher_name[:1]|upper }}</span><span><strong>{{ teacher.teacher_name }}</strong><small>Teacher account</small></span></div>
             <button type="button" data-view="settings">Account Settings</button>
             <button type="button" data-view="settings" data-focus="password">Change Password</button>
             <button type="button" id="profileHelp">Profile details</button>
@@ -75,7 +76,7 @@
         <div class="hero">
           <div class="hero-copy">
             <span class="eyebrow">TEACHER WORKSPACE</span>
-            <h2>Welcome back, Teacher! <span>👋</span></h2>
+            <h2>Welcome back, {{ teacher.teacher_name }}! <span>👋</span></h2>
             <p>Every answer can make a difference. See what your students need today.</p>
             <button class="hero-button" data-view="tagged-questions">Review tagged questions <span>→</span></button>
           </div>
@@ -89,22 +90,22 @@
         <div class="stats-grid">
           <article class="stat-card">
             <div class="stat-symbol blue">＠</div>
-            <div class="stat-copy"><span>Tagged Questions</span><strong>12</strong><small><b>5</b> waiting for an
+            <div class="stat-copy"><span>Tagged Questions</span><strong id="taggedCount">{{ stats.tagged }}</strong><small><b id="pendingTaggedCount">{{ stats.pending_tagged }}</b> waiting for an
                 answer</small></div><span class="stat-mark">↗</span>
           </article>
           <article class="stat-card">
             <div class="stat-symbol amber">◷</div>
-            <div class="stat-copy"><span>Pending Answers</span><strong>5</strong><small>Questions needing
+            <div class="stat-copy"><span>Pending Answers</span><strong id="pendingCount">{{ stats.pending }}</strong><small>Questions needing
                 attention</small></div><span class="stat-mark">↗</span>
           </article>
           <article class="stat-card">
             <div class="stat-symbol mint">✓</div>
-            <div class="stat-copy"><span>Answered Questions</span><strong>28</strong><small>Answers shared with
+            <div class="stat-copy"><span>Answered Questions</span><strong id="answeredCount">{{ stats.answered }}</strong><small>Answers shared with
                 students</small></div><span class="stat-mark">↗</span>
           </article>
           <article class="stat-card">
             <div class="stat-symbol lilac">▣</div>
-            <div class="stat-copy"><span>My Subjects</span><strong>4</strong><small>Subjects in your profile</small>
+            <div class="stat-copy"><span>My Subjects</span><strong id="subjectCount">{{ stats.subjects|length }}</strong><small>Subjects in your activity</small>
             </div><span class="stat-mark">↗</span>
           </article>
         </div>
@@ -117,35 +118,7 @@
                 <p>Take a look at the latest student doubts.</p>
               </div><button class="quiet-link" data-view="question-wall">Open Question Wall <span>→</span></button>
             </div>
-            <div class="question-list">
-              <article class="question-card">
-                <div class="question-meta"><span class="status status-pending">Unanswered</span><time>10 min ago</time>
-                </div>
-                <h4>Can someone explain normalization in DBMS?</h4>
-                <p class="question-byline">Sravya <span>•</span> DBMS <span>•</span> CME · 3rd Year</p>
-                <div class="question-bottom"><span class="subject-pill">Database Management</span><button
-                    class="answer-button" data-question="Can someone explain normalization in DBMS?">Write an answer
-                    <span>→</span></button></div>
-              </article>
-              <article class="question-card">
-                <div class="question-meta"><span class="status status-tagged">Tagged to you</span><time>35 min
-                    ago</time></div>
-                <h4>What is the difference between process and thread?</h4>
-                <p class="question-byline">Kiran <span>•</span> Operating Systems <span>•</span> CME · 3rd Year</p>
-                <div class="question-bottom"><span class="subject-pill">Operating Systems</span><button
-                    class="answer-button" data-question="What is the difference between process and thread?">Write an
-                    answer <span>→</span></button></div>
-              </article>
-              <article class="question-card">
-                <div class="question-meta"><span class="status status-answered">Answered</span><time>Yesterday</time>
-                </div>
-                <h4>How does a stack work in data structures?</h4>
-                <p class="question-byline">Divya <span>•</span> Data Structures <span>•</span> CME · 2nd Year</p>
-                <div class="question-bottom"><span class="subject-pill">Data Structures</span><button
-                    class="answer-button secondary" data-view="answered-questions">View answer <span>→</span></button>
-                </div>
-              </article>
-            </div>
+            <div class="question-list" id="recentQuestions"></div>
           </section>
           <aside class="side-widgets">
             <section class="surface quick-actions">
@@ -171,13 +144,8 @@
                 </div><span class="tiny-dot"></span>
               </div>
               <article class="announcement"><span class="announcement-icon">📌</span>
-                <div><strong>Internal assessment</strong>
-                  <p>Review student doubts before the upcoming assessment.</p><small>Today</small>
-                </div>
-              </article>
-              <article class="announcement"><span class="announcement-icon">📚</span>
-                <div><strong>Share clear explanations</strong>
-                  <p>Use examples to make complex concepts easier.</p><small>This week</small>
+                <div><strong>No announcements published</strong>
+                  <p>New campus updates will appear here when they are added.</p>
                 </div>
               </article>
             </section>
@@ -197,32 +165,7 @@
             class="filter" data-filter="unanswered">Unanswered</button><button class="filter"
             data-filter="tagged">Tagged to me</button><button class="filter" data-filter="answered">Answered</button>
         </div>
-        <div class="wall-grid">
-          <article class="question-card wall-card" data-status="unanswered">
-            <div class="question-meta"><span class="status status-pending">Unanswered</span><time>10 min ago</time>
-            </div>
-            <h4>Can someone explain normalization in DBMS?</h4>
-            <p class="question-byline">Sravya <span>•</span> DBMS <span>•</span> CME · 3rd Year</p>
-            <p class="question-description">I understand the basic idea, but I am confused about the difference between
-              2NF and 3NF. Could someone explain with a simple example?</p><button class="answer-button"
-              data-question="Can someone explain normalization in DBMS?">Write an answer <span>→</span></button>
-          </article>
-          <article class="question-card wall-card" data-status="tagged">
-            <div class="question-meta"><span class="status status-tagged">Tagged to you</span><time>35 min ago</time>
-            </div>
-            <h4>What is the difference between process and thread?</h4>
-            <p class="question-byline">Kiran <span>•</span> Operating Systems <span>•</span> CME · 3rd Year</p>
-            <p class="question-description">Please explain the main differences and provide a practical example.</p>
-            <button class="answer-button" data-question="What is the difference between process and thread?">Write an
-              answer <span>→</span></button>
-          </article>
-          <article class="question-card wall-card" data-status="answered">
-            <div class="question-meta"><span class="status status-answered">Answered</span><time>Yesterday</time></div>
-            <h4>How does a stack work in data structures?</h4>
-            <p class="question-byline">Divya <span>•</span> Data Structures <span>•</span> CME · 2nd Year</p><button
-              class="answer-button secondary" data-view="answered-questions">View answer <span>→</span></button>
-          </article>
-        </div>
+        <div class="wall-grid" id="questionWall"></div>
       </section>
 
       <section class="view" id="taggedQuestionsView">
@@ -230,24 +173,7 @@
           <h2>Tagged Questions</h2>
           <p>Questions specifically tagged to your teacher account.</p>
         </div>
-        <div class="question-list">
-          <article class="question-card">
-            <div class="question-meta"><span class="status status-pending">Pending answer</span><time>35 min ago</time>
-            </div>
-            <h4>What is the difference between process and thread?</h4>
-            <p class="question-byline">Kiran <span>•</span> Operating Systems <span>•</span> CME · 3rd Year</p><button
-              class="answer-button" data-question="What is the difference between process and thread?">Write an answer
-              <span>→</span></button>
-          </article>
-          <article class="question-card">
-            <div class="question-meta"><span class="status status-pending">Pending answer</span><time>2 hours ago</time>
-            </div>
-            <h4>Explain primary key and foreign key with an example.</h4>
-            <p class="question-byline">Nandini <span>•</span> DBMS <span>•</span> CME · 2nd Year</p><button
-              class="answer-button" data-question="Explain primary key and foreign key with an example.">Write an answer
-              <span>→</span></button>
-          </article>
-        </div>
+        <div class="question-list" id="taggedQuestions"></div>
       </section>
 
       <section class="view" id="answeredQuestionsView">
@@ -255,64 +181,32 @@
           <h2>Answered Questions</h2>
           <p>Questions you have already answered.</p>
         </div>
-        <article class="question-card">
-          <div class="question-meta"><span class="status status-answered">Answered</span><time>Yesterday</time></div>
-          <h4>How does a stack work in data structures?</h4>
-          <p class="question-byline">Divya <span>•</span> Data Structures <span>•</span> CME · 2nd Year</p>
-          <div class="answer-preview"><strong>Your answer</strong>
-            <p>A stack follows LIFO (Last In, First Out). The last item added is the first item removed, like a stack of
-              plates.</p>
-          </div>
-        </article>
+        <div class="question-list" id="answeredQuestions"></div>
       </section>
 
       <section class="view" id="mySubjectsView">
         <div class="page-title"><span class="eyebrow">TEACHING PROFILE</span>
           <h2>My Subjects</h2>
-          <p>Subjects associated with your teacher profile.</p>
+          <p>Subjects appearing in questions tagged to you or answered by you.</p>
         </div>
-        <div class="subject-grid">
-          <article class="subject-card"><span>▣</span>
-            <h3>Database Management Systems</h3>
-            <p>DBMS · 18 questions on the wall</p>
-          </article>
-          <article class="subject-card"><span>⌘</span>
-            <h3>Data Structures</h3>
-            <p>DS · 12 questions on the wall</p>
-          </article>
-          <article class="subject-card"><span>▤</span>
-            <h3>Operating Systems</h3>
-            <p>OS · 9 questions on the wall</p>
-          </article>
-          <article class="subject-card"><span>⌨</span>
-            <h3>Python Programming</h3>
-            <p>Python · 14 questions on the wall</p>
-          </article>
-        </div>
+        <div class="subject-grid" id="teacherSubjects"></div>
       </section>
 
       <section class="view" id="notificationsView">
         <div class="page-title"><span class="eyebrow">STAY UP TO DATE</span>
           <h2>Notifications</h2>
           <p>Recent updates related to your teaching activity.</p>
+          <button class="answer-button" type="button" id="markTeacherNotificationsRead">Mark all as read</button>
         </div>
-        <div class="surface notification-list">
-          <article class="notification-item"><span class="notification-icon">＠</span>
-            <div><strong>You were tagged in a question</strong>
-              <p>Kiran tagged you in a question about processes and threads.</p><small>35 minutes ago</small>
-            </div>
-          </article>
-          <article class="notification-item"><span class="notification-icon">▤</span>
-            <div><strong>New question on the Question Wall</strong>
-              <p>A student posted a question about DBMS normalization.</p><small>10 minutes ago</small>
-            </div>
-          </article>
-          <article class="notification-item"><span class="notification-icon">✓</span>
-            <div><strong>Your answer received a reaction</strong>
-              <p>A student found your explanation helpful.</p><small>Yesterday</small>
-            </div>
-          </article>
+        <div class="surface notification-list" id="teacherNotifications"></div>
+      </section>
+
+      <section class="view" id="messagesView">
+        <div class="page-title"><span class="eyebrow">STUDENT CONTACT</span>
+          <h2>Messages</h2>
+          <p>Messages sent to your teacher account.</p>
         </div>
+        <div class="question-list" id="teacherMessages"></div>
       </section>
 
       <section class="view" id="settingsView">
@@ -328,11 +222,11 @@
                 <p>Update the details shown on your teacher account.</p>
               </div>
             </div>
-            <label for="displayName">Display name</label><input id="displayName" value="Teacher Name">
+            <label for="displayName">Display name</label><input id="displayName" value="{{ teacher.teacher_name }}">
             <label for="teacherEmail">Email address</label><input id="teacherEmail" type="email"
-              value="teacher@example.com">
-            <button class="answer-button" id="saveSettings">Save profile changes</button>
-            <p class="form-note">Demo only: connect these changes to your Flask backend to persist them.</p>
+              value="{{ teacher.mail }}">
+            <button class="answer-button" id="saveSettings" type="button">Save profile changes</button>
+            <p class="form-note" id="settingsStatus" role="status"></p>
           </div>
           <div class="surface settings-form password-settings" id="passwordSettings">
             <div class="settings-section-title"><span class="settings-section-icon">⌑</span>
@@ -359,8 +253,7 @@
                 placeholder="Re-enter new password"><button type="button" class="toggle-password"
                 data-target="confirmPassword" aria-label="Show confirm password">◉</button></div>
             <button class="answer-button" id="changePasswordButton" type="button">Update password</button>
-            <p class="form-note">Password changes require backend verification. This front-end demo does not change a
-              real password.</p>
+            <p class="form-note" id="passwordStatus" role="status"></p>
           </div>
         </div>
       </section>
@@ -384,16 +277,23 @@
       <button class="modal-close" id="closeForgotModal" aria-label="Close">×</button>
       <span class="eyebrow">ACCOUNT RECOVERY</span>
       <h2 id="forgotModalTitle">Forgot password?</h2>
-      <p class="modal-question">Enter the email address linked to your teacher account. The backend should send a secure
-        recovery link or OTP.</p>
-      <label for="recoveryEmail">Teacher email</label><input id="recoveryEmail" type="email"
-        placeholder="Enter your registered email">
+      <p class="modal-question">Password recovery is not available. While signed in, change your password in Account Settings.</p>
       <div class="modal-actions"><button class="cancel-button" id="cancelForgot">Cancel</button><button
-          class="answer-button" id="sendRecovery">Continue</button></div>
-      <p class="form-note">Demo only: email delivery and password reset must be implemented securely in Flask.</p>
+          class="answer-button" id="sendRecovery">Close</button></div>
     </div>
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script>
+    window.teacherSpaceUrls = {
+      dashboard: "{{ url_for('teacher_dashboard_data') }}",
+      answerTemplate: "{{ url_for('add_teacher_answer', question_id=0) }}",
+      profile: "{{ url_for('update_teacher_profile') }}",
+      changePassword: "{{ url_for('change_password') }}",
+      notificationReadTemplate: "{{ url_for('mark_notification_read', role='teacher', notification_id=0) }}",
+      notificationsReadAll: "{{ url_for('mark_all_notifications_read', role='teacher') }}",
+      logout: "{{ url_for('logout') }}"
+    };
+  </script>
   <script src="{{ url_for('static', filename='js/teacher_dashboard.js')}}"></script>
 </body>
 

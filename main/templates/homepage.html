@@ -6,14 +6,11 @@
         Student Space
     </title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="{{ url_for('static', filename='js/student_dashboard.js') }}"></script>
 </head>
 
 <body>
     <div class="flex-container">
-        <img src="{{ url_for('static', filename='images/student_icon.png') }}"
-            alt="Students Space">
+        <img src="{{ url_for('static', filename='images/student_icon.png') }}" alt="Students Space">
         <ul class="flex-container1">
             <li>Ask</li>
             <li>Learn</li>
@@ -59,8 +56,12 @@
             </a>
 
         </div>
+        <div class="flex-item3">
+            <a href="{{ url_for('adminlogin') }}" id="Admin">Admin</a>
+        </div>
     </div>
 
 </body>
+<script src="{{ url_for('static', filename='js/home_questions.js') }}"></script>
 
 </html>

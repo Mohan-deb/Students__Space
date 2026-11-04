@@ -10,6 +10,10 @@ const answerModal = document.getElementById("answerModal");
 const modalQuestion = document.getElementById("modalQuestion");
 const answerText = document.getElementById("answerText");
 const forgotModal = document.getElementById("forgotModal");
+const urls = window.teacherSpaceUrls;
+const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+let dashboardData = { questions: [], messages: [], notifications: [], statistics: {} };
+let selectedQuestionId = null;
 
 let toastTimer;
 
@@ -19,10 +23,45 @@ const views = {
     "question-wall": { id: "questionWallView", title: "Question Wall" },
     "tagged-questions": { id: "taggedQuestionsView", title: "Tagged Questions" },
     "answered-questions": { id: "answeredQuestionsView", title: "Answered Questions" },
+    messages: { id: "messagesView", title: "Messages" },
     "my-subjects": { id: "mySubjectsView", title: "My Subjects" },
     notifications: { id: "notificationsView", title: "Notifications" },
     settings: { id: "settingsView", title: "Settings" }
 };
+
+async function apiRequest(url, method = "GET", body = null) {
+    const options = { method, credentials: "same-origin", headers: {} };
+    if (body !== null) {
+        options.headers["Content-Type"] = "application/json";
+        options.headers["X-CSRF-Token"] = csrfToken;
+        options.body = JSON.stringify(body);
+    }
+    const response = await fetch(url, options);
+    let result = {};
+    try { result = await response.json(); } catch (error) { }
+    if (!response.ok) throw new Error(result.error || "The request could not be completed.");
+    return result;
+}
+
+function escapeHTML(value) {
+    return String(value || "").replace(/[&<>"']/g, function (character) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[character];
+    });
+}
+
+function displayTime(value) {
+    if (!value) return "";
+    const date = new Date(value.replace(" ", "T") + "Z");
+    if (Number.isNaN(date.getTime())) return value;
+    const minutes = Math.floor((Date.now() - date.getTime()) / 60000);
+    if (minutes < 1) return "Just now";
+    if (minutes < 60) return minutes + " min ago";
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return hours + " hour" + (hours === 1 ? "" : "s") + " ago";
+    const days = Math.floor(hours / 24);
+    if (days < 7) return days + " day" + (days === 1 ? "" : "s") + " ago";
+    return date.toLocaleDateString();
+}
 
 // Show a message at the bottom of the page.
 function showToast(message) {
@@ -59,6 +98,8 @@ function openView(viewName) {
     document.getElementById("currentSection").textContent = views[viewName].title;
     closeSidebar();
     closeProfileMenu();
+    if (viewName === "notifications") renderNotifications();
+    if (viewName === "messages") renderMessages();
     window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -84,14 +125,19 @@ menuToggle.addEventListener("click", function () {
 });
 sidebarScrim.addEventListener("click", closeSidebar);
 
-// Open the answer popup for the question the teacher selected.
-document.querySelectorAll(".answer-button[data-question]").forEach(function (button) {
-    button.addEventListener("click", function () {
-        modalQuestion.textContent = button.dataset.question;
-        answerText.value = "";
-        answerModal.classList.add("show");
-        answerText.focus();
+// Open the answer popup for a question rendered from SQLite.
+document.addEventListener("click", function (event) {
+    const button = event.target.closest(".answer-button[data-question-id]");
+    if (!button) return;
+    const question = dashboardData.questions.find(function (item) {
+        return Number(item.id) === Number(button.dataset.questionId);
     });
+    if (!question) return;
+    selectedQuestionId = question.id;
+    modalQuestion.textContent = question.title + " — " + question.description;
+    answerText.value = "";
+    answerModal.classList.add("show");
+    answerText.focus();
 });
 
 function closeAnswerModal() {
@@ -113,16 +159,26 @@ document.addEventListener("keydown", function (event) {
     }
 });
 
-// Check the answer field before showing the demo confirmation.
-document.getElementById("submitAnswer").addEventListener("click", function () {
+// Save a teacher answer through the authenticated Flask route.
+document.getElementById("submitAnswer").addEventListener("click", async function () {
     if (answerText.value.trim() === "") {
         showToast("Write an answer before submitting.");
         answerText.focus();
         return;
     }
 
-    closeAnswerModal();
-    showToast("Demo only: connect answer submission to Flask + MySQL to save this answer.");
+    try {
+        await apiRequest(
+            urls.answerTemplate.replace("/0/answers", `/${selectedQuestionId}/answers`),
+            "POST",
+            { content: answerText.value.trim() }
+        );
+        closeAnswerModal();
+        await loadDashboard();
+        showToast("Your answer was saved.");
+    } catch (error) {
+        showToast(error.message);
+    }
 });
 
 // Filter Question Wall cards by status.
@@ -135,7 +191,9 @@ document.querySelectorAll(".filter").forEach(function (button) {
 
         const selectedStatus = button.dataset.filter;
         document.querySelectorAll("#questionWallView .wall-card").forEach(function (card) {
-            card.hidden = selectedStatus !== "all" && card.dataset.status !== selectedStatus;
+            if (selectedStatus === "all") card.hidden = false;
+            else if (selectedStatus === "tagged") card.hidden = card.dataset.tagged !== "true";
+            else card.hidden = card.dataset.status !== selectedStatus;
         });
     });
 });
@@ -146,7 +204,7 @@ document.getElementById("searchInput").addEventListener("input", function (event
     const activeSection = document.querySelector(".view.active");
     if (!activeSection) return;
 
-    activeSection.querySelectorAll(".question-card, .subject-card, .notification-item").forEach(function (card) {
+    activeSection.querySelectorAll(".question-card, .subject-card, .notification-item, .message-card").forEach(function (card) {
         card.hidden = searchText !== "" && !card.textContent.toLowerCase().includes(searchText);
     });
 });
@@ -198,16 +256,15 @@ if (profileHelp) {
     });
 }
 
-// The real sign-out action must be connected to a Flask route.
 const profileSignOut = document.getElementById("profileSignOut");
 if (profileSignOut) {
     profileSignOut.addEventListener("click", function () {
         closeProfileMenu();
-        showToast("Connect this action to your Flask logout route to sign out securely.");
+        window.location.href = urls.logout;
     });
 }
 
-// Forgot-password popup. Sending a real email needs a Flask backend.
+// Show the available account recovery guidance.
 function closeForgotModal() {
     if (forgotModal) forgotModal.classList.remove("show");
 }
@@ -215,11 +272,8 @@ function closeForgotModal() {
 const forgotPasswordButton = document.getElementById("forgotPasswordButton");
 if (forgotPasswordButton) {
     forgotPasswordButton.addEventListener("click", function () {
-        const teacherEmail = document.getElementById("teacherEmail");
-        const recoveryEmail = document.getElementById("recoveryEmail");
-        recoveryEmail.value = teacherEmail ? teacherEmail.value : "";
         forgotModal.classList.add("show");
-        recoveryEmail.focus();
+        document.getElementById("sendRecovery").focus();
     });
 }
 
@@ -229,20 +283,9 @@ forgotModal.addEventListener("click", function (event) {
     if (event.target === forgotModal) closeForgotModal();
 });
 
-// Check the recovery email format before showing the demo message.
 document.getElementById("sendRecovery").addEventListener("click", function () {
-    const recoveryEmail = document.getElementById("recoveryEmail");
-    const email = recoveryEmail.value.trim();
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!emailPattern.test(email)) {
-        showToast("Enter a valid registered email address.");
-        recoveryEmail.focus();
-        return;
-    }
-
     closeForgotModal();
-    showToast("UI demo only: connect this to a secure Flask recovery endpoint to send an OTP or reset link.");
+    showToast("Password recovery is unavailable. Change your password in Account Settings while signed in.");
 });
 
 // Show or hide password characters.
@@ -255,11 +298,12 @@ document.querySelectorAll(".toggle-password").forEach(function (button) {
     });
 });
 
-// Check password fields before showing the demo confirmation.
-document.getElementById("changePasswordButton").addEventListener("click", function () {
+// Verify the current password and store the new hash through Flask.
+document.getElementById("changePasswordButton").addEventListener("click", async function () {
     const currentPassword = document.getElementById("currentPassword").value;
     const newPassword = document.getElementById("newPassword").value;
     const confirmPassword = document.getElementById("confirmPassword").value;
+    const status = document.getElementById("passwordStatus");
 
     if (!currentPassword || !newPassword || !confirmPassword) {
         showToast("Fill in all three password fields.");
@@ -275,10 +319,196 @@ document.getElementById("changePasswordButton").addEventListener("click", functi
         return;
     }
 
-    showToast("UI demo only: connect password change to Flask with secure password verification.");
+    try {
+        await apiRequest(urls.changePassword, "POST", {
+            current_password: currentPassword,
+            new_password: newPassword
+        });
+        status.textContent = "Password changed successfully.";
+        document.getElementById("currentPassword").value = "";
+        document.getElementById("newPassword").value = "";
+        document.getElementById("confirmPassword").value = "";
+        showToast("Password changed successfully.");
+    } catch (error) {
+        status.textContent = error.message;
+        showToast(error.message);
+    }
 });
 
-// Saving real settings also requires a Flask route.
-document.getElementById("saveSettings").addEventListener("click", function () {
-    showToast("Demo only: connect settings to Flask to save changes.");
+document.getElementById("saveSettings").addEventListener("click", async function () {
+    const status = document.getElementById("settingsStatus");
+    try {
+        const result = await apiRequest(urls.profile, "POST", {
+            name: document.getElementById("displayName").value.trim(),
+            email: document.getElementById("teacherEmail").value.trim()
+        });
+        renderTeacherProfile(result.profile);
+        status.textContent = "Profile changes saved.";
+        showToast("Profile changes saved.");
+    } catch (error) {
+        status.textContent = error.message;
+        showToast(error.message);
+    }
+});
+
+function renderTeacherProfile(profile) {
+    document.querySelectorAll(".sidebar-footer strong, .profile-copy strong, .profile-menu-head strong")
+        .forEach(function (element) { element.textContent = profile.teacher_name; });
+    document.querySelectorAll(".teacher-mini-avatar, .profile-avatar")
+        .forEach(function (element) { element.textContent = profile.teacher_name.slice(0, 1).toUpperCase(); });
+    document.getElementById("displayName").value = profile.teacher_name;
+    document.getElementById("teacherEmail").value = profile.mail;
+}
+
+function questionCard(question, wallCard = false, answeredByTeacher = false) {
+    let statusText = "Unanswered";
+    let statusClass = "status-pending";
+    if (question.status === "answered") {
+        statusText = "Answered";
+        statusClass = "status-answered";
+    } else if (question.teacher_tagged) {
+        statusText = "Tagged to you";
+        statusClass = "status-tagged";
+    }
+
+    const answerButton = question.status === "unanswered"
+        ? `<button class="answer-button" type="button" data-question-id="${question.id}">Write an answer <span>→</span></button>`
+        : "";
+    const answerPreviews = (question.answer_records || []).map(function (answer) {
+        return `<div class="answer-preview"><strong>${escapeHTML(answer.author_name)}</strong>
+            <p>${escapeHTML(answer.content)}</p><small>${escapeHTML(displayTime(answer.created_at))}</small></div>`;
+    }).join("");
+
+    return `<article class="question-card ${wallCard ? "wall-card" : ""}"
+        data-status="${question.status}" data-tagged="${question.teacher_tagged ? "true" : "false"}">
+        <div class="question-meta"><span class="status ${statusClass}">${statusText}</span>
+            <time>${escapeHTML(displayTime(question.created_at))}</time></div>
+        <h4>${escapeHTML(question.title)}</h4>
+        <p class="question-byline">${escapeHTML(question.student_name)} <span>•</span> ${escapeHTML(question.subject)}</p>
+        <p class="question-description">${escapeHTML(question.description)}</p>
+        ${answeredByTeacher ? "" : answerButton}
+        ${answerPreviews}
+    </article>`;
+}
+
+function renderQuestions() {
+    const questions = dashboardData.questions;
+    document.getElementById("recentQuestions").innerHTML = questions.length
+        ? questions.slice(0, 3).map(function (item) { return questionCard(item); }).join("")
+        : '<p class="form-note">No questions have been posted yet.</p>';
+
+    document.getElementById("questionWall").innerHTML = questions.length
+        ? questions.map(function (item) { return questionCard(item, true); }).join("")
+        : '<p class="form-note">No questions have been posted yet.</p>';
+
+    const tagged = questions.filter(function (item) { return item.teacher_id !== null; });
+    document.getElementById("taggedQuestions").innerHTML = tagged.length
+        ? tagged.map(function (item) { return questionCard(item); }).join("")
+        : '<p class="form-note">No questions are tagged to your account.</p>';
+
+    const answeredByMe = questions.filter(function (item) {
+        return (item.answer_records || []).some(function (answer) {
+            return Number(answer.teacher_id) === Number(dashboardData.profile.id);
+        });
+    });
+    document.getElementById("answeredQuestions").innerHTML = answeredByMe.length
+        ? answeredByMe.map(function (item) { return questionCard(item, false, true); }).join("")
+        : '<p class="form-note">You have not answered any questions yet.</p>';
+
+    const subjectGrid = document.getElementById("teacherSubjects");
+    const subjects = dashboardData.statistics.subjects || [];
+    subjectGrid.innerHTML = subjects.length ? subjects.map(function (subject) {
+        const count = questions.filter(function (item) { return item.subject === subject; }).length;
+        return `<article class="subject-card"><span>▣</span><h3>${escapeHTML(subject)}</h3>
+            <p>${count} question${count === 1 ? "" : "s"} visible on the wall</p></article>`;
+    }).join("") : '<p class="form-note">No subject activity is available yet.</p>';
+}
+
+function renderMessages() {
+    const container = document.getElementById("teacherMessages");
+    if (!container) return;
+    container.innerHTML = dashboardData.messages.length ? dashboardData.messages.map(function (message) {
+        return `<article class="question-card message-card">
+            <div class="question-meta"><span class="status status-tagged">From ${escapeHTML(message.sender_name)}</span>
+                <time>${escapeHTML(displayTime(message.created_at))}</time></div>
+            <p class="question-byline">${escapeHTML(message.sender_email)}</p>
+            <p class="question-description">${escapeHTML(message.content)}</p>
+        </article>`;
+    }).join("") : '<p class="form-note">You have no student messages.</p>';
+}
+
+function renderNotifications() {
+    const container = document.getElementById("teacherNotifications");
+    if (!container) return;
+    container.innerHTML = dashboardData.notifications.length ? dashboardData.notifications.map(function (item) {
+        const icon = item.kind === "student_message" ? "✉" : "＠";
+        return `<article class="notification-item ${item.is_read ? "read" : "unread"}"
+            data-notification-id="${item.id}" role="button" tabindex="0">
+            <span class="notification-icon">${icon}</span><div><strong>${escapeHTML(item.title)}</strong>
+                <p>${escapeHTML(item.content)}</p><small>${escapeHTML(displayTime(item.created_at))}</small></div>
+        </article>`;
+    }).join("") : '<p class="form-note">You have no notifications.</p>';
+
+    container.querySelectorAll("[data-notification-id]").forEach(function (item) {
+        item.addEventListener("click", async function () {
+            const selected = dashboardData.notifications.find(function (notification) {
+                return Number(notification.id) === Number(item.dataset.notificationId);
+            });
+            if (!selected || selected.is_read) return;
+            try {
+                await apiRequest(
+                    urls.notificationReadTemplate.replace("/0/read", `/${selected.id}/read`),
+                    "POST", {}
+                );
+                selected.is_read = 1;
+                updateNotificationBadges();
+                renderNotifications();
+            } catch (error) {
+                showToast(error.message);
+            }
+        });
+    });
+}
+
+function updateNotificationBadges() {
+    const unread = dashboardData.notifications.filter(function (item) { return !item.is_read; }).length;
+    document.getElementById("notificationBadge").textContent = unread;
+    document.getElementById("notificationBadge").hidden = unread === 0;
+    document.getElementById("topNotificationCount").textContent = unread;
+    document.getElementById("topNotificationCount").parentElement.style.display = unread ? "grid" : "none";
+}
+
+async function loadDashboard() {
+    dashboardData = await apiRequest(urls.dashboard);
+    renderTeacherProfile(dashboardData.profile);
+    renderQuestions();
+    renderMessages();
+    renderNotifications();
+
+    const statistics = dashboardData.statistics;
+    document.getElementById("taggedCount").textContent = statistics.tagged;
+    document.getElementById("taggedBadge").textContent = statistics.tagged;
+    document.getElementById("pendingTaggedCount").textContent = statistics.pending_tagged;
+    document.getElementById("pendingCount").textContent = statistics.pending;
+    document.getElementById("answeredCount").textContent = statistics.answered;
+    document.getElementById("subjectCount").textContent = statistics.subjects.length;
+    document.getElementById("messageBadge").textContent = dashboardData.messages.length;
+    document.getElementById("messageBadge").hidden = dashboardData.messages.length === 0;
+    updateNotificationBadges();
+}
+
+document.getElementById("markTeacherNotificationsRead").addEventListener("click", async function () {
+    try {
+        await apiRequest(urls.notificationsReadAll, "POST", {});
+        dashboardData.notifications.forEach(function (item) { item.is_read = 1; });
+        updateNotificationBadges();
+        renderNotifications();
+        showToast("All notifications marked as read.");
+    } catch (error) {
+        showToast(error.message);
+    }
+});
+
+loadDashboard().catch(function (error) {
+    showToast(error.message);
 });

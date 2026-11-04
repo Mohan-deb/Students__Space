@@ -875,6 +875,9 @@ a {
 .notification-item:last-child {
   border-bottom:0;
 }
+.notification-item.unread {
+  background:#f3f9fa;
+}
 .notification-icon {
   display:grid;
   place-items:center;
