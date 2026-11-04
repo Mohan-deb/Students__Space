@@ -18,13 +18,20 @@ try:
     from database.db import init_app, init_db
     from auth.decorators import login_required, role_required
     from pathlib import Path
+    from dotenv import load_dotenv
 except ModuleNotFoundError as error:
     raise error
 
 
 app = Flask(__name__)
 
-app.config["SECRET_KEY"] = os.environ.get("STUDENTS_SPACE_SECRET_KEY") or secrets.token_hex(32)
+# Load environment variables from the .env file
+load_dotenv(Path(__file__).resolve().parent / ".env.example")
+
+app.config["SECRET_KEY"] = os.environ.get("STUDENTS_SPACE_SECRET_KEY")
+
+if not app.config["SECRET_KEY"]:
+    raise RuntimeError("STUDENTS_SPACE_SECRET_KEY is not configured.")
 
 app.config["DATABASE"] = str(
     Path(app.root_path)
@@ -35,13 +42,25 @@ app.config["DATABASE"] = str(
 init_app(app)
 
 # Create missing tables without changing existing student or teacher rows.
+# Initialize database and create the first admin if needed.
 with app.app_context():
     init_db()
+
+    admin_name = os.environ.get("STUDENTS_SPACE_ADMIN_NAME")
+    admin_email = os.environ.get("STUDENTS_SPACE_ADMIN_EMAIL")
+    admin_password = os.environ.get("STUDENTS_SPACE_ADMIN_PASSWORD")
+
+    if not all([admin_name, admin_email, admin_password]):
+        raise RuntimeError(
+            "Initial admin credentials are missing from the .env file."
+        )
+
     admin_database = AdminService()
+
     admin_database.ensure_initial_admin(
-        os.environ.get("STUDENTS_SPACE_ADMIN_NAME"),
-        os.environ.get("STUDENTS_SPACE_ADMIN_EMAIL"),
-        os.environ.get("STUDENTS_SPACE_ADMIN_PASSWORD")
+        admin_name.strip(),
+        admin_email.strip().lower(),
+        admin_password
     )
 
 student_database = StudentService()

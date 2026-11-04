@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS questions (
     student_id INTEGER NOT NULL,
     subject TEXT NOT NULL,
     title TEXT NOT NULL,
-    description TEXT NOT NULL,
+    description TEXT,
     teacher_id INTEGER,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,

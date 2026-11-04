@@ -165,7 +165,7 @@ document.addEventListener("DOMContentLoaded", function () {
             <div class="tags">
                 <span>${escapeHTML(question.subject)}</span>
                 ${question.teacherTagged && question.teacher_name
-                    ? `<span>Tagged to ${escapeHTML(question.teacher_name)}</span>` : ""}
+                ? `<span>Tagged to ${escapeHTML(question.teacher_name)}</span>` : ""}
             </div>
         `;
 
@@ -422,12 +422,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const title = document.getElementById("title").value.trim();
             const subject = document.getElementById("subject").value;
-            const description =
+            description =
                 document.getElementById("description").value.trim();
 
-            if (!title || !subject || !description) {
+            if (!title || !subject) {
                 showToast("Please fill all the fields.");
                 return;
+            }
+            if (!description) {
+                description = null
             }
             if (tagTeacher.checked && !teacherSelect.value) {
                 showToast("Select the teacher you want to tag.");

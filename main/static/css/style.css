@@ -1,18 +1,20 @@
-*{
+* {
     background-color: aliceblue;
     padding: 0px;
     margin: 0px;
 }
 
-div img{
+div img {
     width: 200px;
     height: 200px;
     object-fit: fill;
 }
-ul li{
+
+ul li {
     font-size: large;
 }
-.flex-container{
+
+.flex-container {
     width: auto;
     height: auto;
     margin: 50px;
@@ -21,70 +23,82 @@ ul li{
     flex-direction: column;
     align-items: center;
 }
-.flex-container1{
+
+.flex-container1 {
     width: 200px;
     display: flex;
     flex-wrap: wrap;
     flex-direction: row;
     justify-content: space-between;
-    margin-bottom:  15px;
+    margin-bottom: 15px;
 }
 
-.flex-item2{
+.flex-item2 {
     width: 350px;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
 }
-#Student,#Teacher,#Admin{
+
+#Student,
+#Teacher,
+#Admin {
     padding: 10px;
     border-radius: 15px;
-    background-color:rgba(15, 3, 255, 0.784) ;
+    background-color: rgba(15, 3, 255, 0.784);
     font-weight: 700px;
     color: white;
     font-size: medium;
 }
-#Admin{
+
+#Admin {
     width: 70px;
     border-color: white;
-    margin-top:7px;
+    margin-top: 7px;
     text-align: center;
     height: 20px;
     width: 90px;
 }
-.flex-item3{
+
+.flex-item3 {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
 }
-a{
+
+a {
     text-decoration: none;
     background: none;
     color: white;
 }
-a:hover
-{
+
+a:hover {
     background: none;
     color: black;
 }
-#Student:hover{
+
+#Student:hover {
     background-color: rgb(106, 215, 234);
     color: black;
 }
-#Teacher:hover{
+
+#Teacher:hover {
     background-color: rgb(106, 215, 234);
     color: black;
 }
-#Admin:hover{
+
+#Admin:hover {
     background-color: rgb(106, 215, 234);
     color: black;
 }
-#accordian{
+
+#accordian {
     margin: 100px auto;
     width: 600px;
 }
-#accordian li{
+
+#accordian li {
     list-style: none;
     background-color: white;
     width: 100%;
@@ -92,6 +106,7 @@ a:hover
     padding: 10px;
     border-radius: 5px;
 }
+
 #accordian li label {
     padding: 15px;
     display: flex;
@@ -101,6 +116,7 @@ a:hover
     font-weight: 500;
     cursor: pointer;
 }
+
 #accordian li label .arrow {
     width: 8px;
     height: 8px;
@@ -110,15 +126,74 @@ a:hover
     transition: transform 0.3s ease;
     margin-right: 5px;
 }
+
 #accordian li label .arrow.active {
     transform: rotate(225deg);
 }
 
-#accordian label + input[type="checkbox"]{
+#accordian label+input[type="checkbox"] {
     display: none;
 }
+
 #accordian .content {
     padding: 0 10px;
     line-height: 26px;
     display: none;
+}
+
+
+#accordian {
+    margin: 100px auto;
+    width: 600px;
+    max-width: 90%;
+}
+
+#accordian li {
+    list-style: none;
+    background-color: white;
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+#accordian li label {
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 18px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+#accordian li label .arrow {
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid #333;
+    border-bottom: 2px solid #333;
+    transform: rotate(45deg);
+    transition: transform 0.3s ease;
+    margin-right: 5px;
+}
+
+#accordian input[type="checkbox"] {
+    display: none;
+}
+
+/* Hide answers by default */
+#accordian .content {
+    display: none;
+    padding: 0 10px;
+    line-height: 26px;
+}
+
+/* Show answer when checkbox is checked */
+#accordian input[type="checkbox"]:checked+.content {
+    display: block;
+}
+
+/* Rotate arrow when question is open */
+#accordian li:has(input[type="checkbox"]:checked) .arrow {
+    transform: rotate(225deg);
 }
